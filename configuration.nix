@@ -67,20 +67,6 @@
   programs = {
     zsh = {
       enable = true;
-      #      autosuggestions.enable = true;
-      #      zsh-autoenv.enable = true;
-      #      syntaxHighlighting.enable = true;
-      #      ohMyZsh = {
-      #         enable = true;
-      #         theme = "robbyrussell";
-      #         plugins = [
-      #           "git"
-      #           "npm"
-      #           "history"
-      #           "node"
-      #           "rust"
-      #         ];
-      #      };
     };
   };
 
@@ -92,12 +78,14 @@
   fonts.packages = with pkgs; [ nerdfonts ];
   environment.systemPackages = with pkgs; [
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-    neovim
     nerdfonts
+    picom
+    pcre.dev
     zsh
     helix
     typescript
     nodePackages_latest.typescript-language-server
+    nodePackages_latest.bash-language-server
     starship
     xorg.xrandr
     arandr

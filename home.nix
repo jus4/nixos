@@ -1,6 +1,15 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
+
+ #   imports = [
+ #   ./modules/home/nixvim.nix
+ #   ./modules/home/nnn.nix
+ #   nixvim.homeManagerModules.nixvim
+ # ];
+  #imports = [
+  #  inputs.nixvim.homeManagerModules.nixvim 
+  #];
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "juice";
@@ -80,14 +89,27 @@
         terminal = "alacritty"
       }
   '';
+  programs.alacritty = import ./pkgs/alacritty/default.nix { inherit pkgs; };
 
-  programs.alacritty.enable = true;
-  programs.alacritty.settings = {
-    shell = {
-      #program: ${zsh}/bin/zsh 
-      program = "/run/current-system/sw/bin/zsh";
-    };
+  programs.nixvim = {
+    enable = true;
+    colorschemes.gruvbox.enable = true;
+    plugins.lightline.enable = true;
   };
+
+  #programs.alacritty.enable = true;
+  #programs.alacritty.settings = {
+  #  shell = {
+  #    #program: ${zsh}/bin/zsh 
+  #    program = "/run/current-system/sw/bin/zsh";
+  #  };
+  #  env.TERM = "xterm-256color";
+  #  font = {
+  #    size = 12;
+  #  };
+  #  scrolling.multiplier = 5;
+  #  selection.save_to_clipboard = true;
+  #};
 
   programs.zsh = {
     enable = true;
@@ -181,6 +203,13 @@
     enable = true;
   };
 
+  #programs.neovim = {
+  #  enable = true;
+  #  extraLuaConfig = lib.fileContents ./neovim/init.lua;
+  #};
+
+
+
   programs.helix = {
   enable = true;
   settings = {
@@ -203,6 +232,10 @@
     };
   };
   };
+
+  services.picom.enable = true;
+  services.picom.backend = "glx";
+  #picom.settings = builtins.readFile ./wm/picom/picom.conf;
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
