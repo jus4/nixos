@@ -10,9 +10,11 @@
   ];
 
   # Bootloader.
-  boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/sda";
-  boot.loader.grub.useOSProber = true;
+  #boot.loader.grub.enable = true;
+  #boot.loader.grub.device = "/dev/sda";
+  #boot.loader.grub.useOSProber = true;
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "juice"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -47,6 +49,7 @@
     enable = true;
     layout = "fi";
     windowManager.xmonad.enable = true;
+    windowManager.xmonad.enableContribAndExtras = true;
     xkbVariant = "";
   };
 
@@ -77,6 +80,7 @@
   # $ nix search wget
   fonts.packages = with pkgs; [ nerdfonts ];
   environment.systemPackages = with pkgs; [
+    acpi
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     nerdfonts
     picom

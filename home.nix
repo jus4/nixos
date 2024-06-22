@@ -19,6 +19,7 @@
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = [
+    pkgs.qutebrowser
     # # Adds the 'hello' command to your environment. It prints a friendly
     # # "Hello, world!" when run.
     # pkgs.hello
@@ -71,16 +72,31 @@
   home.sessionVariables = {
     # EDITOR = "emacs";
   };
+  #xsession.windowManager.xmoand.config = builtins.readFile /home/juice/.dotfiles/wm/xmonad/xmonad.hs;
+  #xsession.windowManager.xmonad.config = pkgs.writeText "xmonad.hs" ''
+  #import XMonad
+  #main = xmonad defaultConfig
+  #    { terminal    = "alacritty"
+  #    , modMask     = mod4Mask
+  #    , borderWidth = 3
+  #    }
+  #'';
 
-  xsession.windowManager.xmonad.config = pkgs.writeText "xmonad.hs" ''
-    import XMonad
 
-    main :: IO()
-    main = xmonad $ def
-      {
-        terminal = "alacritty"
-      }
-  '';
+  xsession = {
+    enable = true;
+
+    windowManager.xmonad = {
+      enable = true;
+      enableContribAndExtras = true;
+      extraPackages = hp: [
+        hp.dbus
+        hp.monad-logger
+      ];
+      config = ./xmonad.hs;
+    };
+  };
+
   programs.alacritty = import ./pkgs/alacritty/default.nix { inherit pkgs; };
 
   programs.nixvim = {
@@ -110,15 +126,6 @@
         "<leader>p" = "oldfiles";
         "<C-f>" = "live_grep";
       };
-
-      #keymaps = {
-      #  "<leader>pf" = "find_files";
-#vim.keymap.set('n', '<leader>pf', builtin.find_files, {})
-#vim.keymap.set('n', '<C-p>', builtin.git_files, {})
-#vim.keymap.set('n', '<leader>ps', function()
-#	builtin.grep_string({ search = vim.fn.input("Grep > ")});
-#end)
-      #};
     };
     plugins.barbar = {
       enable = true;
@@ -151,20 +158,6 @@
       };
     };
   };
-
-  #programs.alacritty.enable = true;
-  #programs.alacritty.settings = {
-  #  shell = {
-  #    #program: ${zsh}/bin/zsh 
-  #    program = "/run/current-system/sw/bin/zsh";
-  #  };
-  #  env.TERM = "xterm-256color";
-  #  font = {
-  #    size = 12;
-  #  };
-  #  scrolling.multiplier = 5;
-  #  selection.save_to_clipboard = true;
-  #};
 
   programs.zsh = {
     enable = true;
@@ -284,7 +277,6 @@
 
   services.picom.enable = true;
   services.picom.backend = "glx";
-  #picom.settings = builtins.readFile ./wm/picom/picom.conf;
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
