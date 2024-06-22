@@ -2,14 +2,6 @@
 
 {
 
- #   imports = [
- #   ./modules/home/nixvim.nix
- #   ./modules/home/nnn.nix
- #   nixvim.homeManagerModules.nixvim
- # ];
-  #imports = [
-  #  inputs.nixvim.homeManagerModules.nixvim 
-  #];
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "juice";
@@ -93,8 +85,71 @@
 
   programs.nixvim = {
     enable = true;
+    globals = {
+      mapleader = " ";
+      maplocalleader = " ";
+    };
     colorschemes.gruvbox.enable = true;
     plugins.lightline.enable = true;
+    extraConfigLua = lib.fileContents ./neovim/init.lua;
+    plugins.treesitter = {
+      enable = true;
+    };
+    plugins.telescope = {
+      enable = true;
+      keymaps = {
+        # Find files using Telescope command-line sugar.
+        "<leader>pf" = "find_files";
+        "<leader>fg" = "live_grep";
+        "<leader>b" = "buffers";
+        "<leader>fh" = "help_tags";
+        "<leader>fd" = "diagnostics";
+
+        # FZF like bindings
+        "<C-p>" = "git_files";
+        "<leader>p" = "oldfiles";
+        "<C-f>" = "live_grep";
+      };
+
+      #keymaps = {
+      #  "<leader>pf" = "find_files";
+#vim.keymap.set('n', '<leader>pf', builtin.find_files, {})
+#vim.keymap.set('n', '<C-p>', builtin.git_files, {})
+#vim.keymap.set('n', '<leader>ps', function()
+#	builtin.grep_string({ search = vim.fn.input("Grep > ")});
+#end)
+      #};
+    };
+    plugins.barbar = {
+      enable = true;
+    };
+    plugins.lsp = {
+      enable = true;
+      keymaps = {
+        silent = true;
+        diagnostic = {
+          # Navigate in diagnostics
+          "<leader>k" = "goto_prev";
+          "<leader>j" = "goto_next";
+        };
+
+        lspBuf = {
+          gd = "definition";
+          gD = "references";
+          gt = "type_definition";
+          gi = "implementation";
+          K = "hover";
+          "<F2>" = "rename";
+        };
+      };
+      servers = {
+	      tsserver.enable = true;
+	      eslint.enable = true;
+	      graphql.enable = true;
+	      html.enable = true;
+	      nixd.enable = true;
+      };
+    };
   };
 
   #programs.alacritty.enable = true;
@@ -118,8 +173,8 @@
       theme = "robbyrussell";
       plugins = [ 
         "git" 
-	"node"
-	"history"
+	      "node"
+	      "history"
         "zsh-users/zsh-autosuggestions" 
         { name = "romkatv/powerlevel10k"; tags = [ as:theme depth:1 ]; } 
       ];
@@ -202,12 +257,6 @@
   programs.git = {
     enable = true;
   };
-
-  #programs.neovim = {
-  #  enable = true;
-  #  extraLuaConfig = lib.fileContents ./neovim/init.lua;
-  #};
-
 
 
   programs.helix = {
