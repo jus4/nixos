@@ -2,6 +2,11 @@
 
 {
 
+  imports = [
+    ./wm/xmonad
+    ./wm/polybar
+  ];
+
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "juice";
@@ -16,13 +21,33 @@
   # release notes.
   home.stateVersion = "24.05"; # Please read the comment before changing.
 
+  # Allow unfree packages
+  nixpkgs.config.allowUnfree = true;
+
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = [
     pkgs.qutebrowser
-    # # Adds the 'hello' command to your environment. It prints a friendly
-    # # "Hello, world!" when run.
-    # pkgs.hello
+    pkgs.google-chrome
+    pkgs.polybar
+    pkgs.trayer
+
+    pkgs.pavucontrol # pulseaudio volume control
+    pkgs.paprefs # pulseaudio preferences
+
+    pkgs.pulsemixer
+
+    # xmonad
+    pkgs.dialog # Dialog boxes on the terminal (to show key bindings)
+    pkgs.networkmanager_dmenu # networkmanager on dmenu
+    pkgs.networkmanagerapplet # networkmanager applet
+    pkgs.nitrogen # wallpaper manager
+    pkgs.xcape # keymaps modifier
+    pkgs.xorg.xkbcomp # keymaps modifier
+    pkgs.xorg.xmodmap # keymaps modifier
+    pkgs.xorg.xrandr # display manager (X Resize and Rotate protocol)
+
+
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
@@ -71,30 +96,6 @@
   #
   home.sessionVariables = {
     # EDITOR = "emacs";
-  };
-  #xsession.windowManager.xmoand.config = builtins.readFile /home/juice/.dotfiles/wm/xmonad/xmonad.hs;
-  #xsession.windowManager.xmonad.config = pkgs.writeText "xmonad.hs" ''
-  #import XMonad
-  #main = xmonad defaultConfig
-  #    { terminal    = "alacritty"
-  #    , modMask     = mod4Mask
-  #    , borderWidth = 3
-  #    }
-  #'';
-
-
-  xsession = {
-    enable = true;
-
-    windowManager.xmonad = {
-      enable = true;
-      enableContribAndExtras = true;
-      extraPackages = hp: [
-        hp.dbus
-        hp.monad-logger
-      ];
-      config = ./xmonad.hs;
-    };
   };
 
   programs.alacritty = import ./pkgs/alacritty/default.nix { inherit pkgs; };

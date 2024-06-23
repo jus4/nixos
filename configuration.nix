@@ -43,19 +43,20 @@
     LC_TELEPHONE = "fi_FI.UTF-8";
     LC_TIME = "fi_FI.UTF-8";
   };
+ 
 
-  # Configure keymap in X11
-  services.xserver = {
-    enable = true;
-    layout = "fi";
-    windowManager.xmonad.enable = true;
-    windowManager.xmonad.enableContribAndExtras = true;
-    xkbVariant = "";
+  # Enable sound with pipewire.
+  hardware.pulseaudio.enable = false; security.rtkit.enable = true; services.pipewire = {
+    enable = true; alsa.enable = true; alsa.support32Bit = true; pulse.enable = true;
+    # If you want to use JACK applications, uncomment this jack.enable = true;
+
+    # use the example session manager (no others are packaged yet so this is enabled by default, no need to redefine it in your config for now)
+    #media-session.enable = true;
   };
 
   # Configure console keymap
   console.keyMap = "fi";
-
+  
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.juice = {
     isNormalUser = true;
@@ -73,6 +74,11 @@
     };
   };
 
+  #slock
+  programs.slock.enable = true;
+  programs.xss-lock.enable = true;
+  programs.xss-lock.lockerCommand = "/run/wrappers/bin/slock";
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
@@ -83,14 +89,17 @@
     acpi
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     nerdfonts
+    dunst
     picom
     pcre.dev
     zsh
     helix
     typescript
-    nodePackages_latest.typescript-language-server
-    nodePackages_latest.bash-language-server
+    #nodePackages_latest.typescript-language-server
+    #nodePackages_latest.bash-language-server
     starship
+    slack
+    slock
     xorg.xrandr
     arandr
     git
@@ -104,11 +113,39 @@
     wget
   ];
 
-  nix.registry."node".to = {
-    type = "github";
-    owner = "andyrichardson";
-    repo = "nix-node";
+  services = {
+    printing.enable = true;
+
+    gnome.gnome-keyring.enable = true;
+    upower.enable = true;
+
+    dbus = {
+      enable = true;
+      packages = [ pkgs.dconf ];
+    };
+
+    # Configure keymap in X11
+    xserver = {
+      enable = true;
+      layout = "fi";
+      windowManager.xmonad.enable = true;
+      windowManager.xmonad.enableContribAndExtras = true;
+      xkbVariant = "";
+
+      libinput = {
+        enable = true;
+        disableWhileTyping = true;
+      };
+
+    };
+
+    blueman.enable = true;
+
   };
+
+  hardware.bluetooth.enable = true;
+
+  systemd.services.upower.enable = true;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
