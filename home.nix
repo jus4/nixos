@@ -5,6 +5,7 @@
   imports = [
     ./wm/xmonad
     ./wm/polybar
+    ./services/dunst
   ];
 
   # Home Manager needs a bit of information about you and the paths it should
@@ -47,7 +48,11 @@
     pkgs.xorg.xmodmap # keymaps modifier
     pkgs.xorg.xrandr # display manager (X Resize and Rotate protocol)
 
+    # dropbox
+    pkgs.maestral
 
+    # Notifications send
+    pkgs.libnotify
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
@@ -176,6 +181,14 @@
     autosuggestion.enable = true;
   };
 
+  programs.emacs = {
+    enable = true;
+    package = pkgs.emacs;  # replace with pkgs.emacs-gtk, or a version provided by the community overlay if desired.
+    extraConfig = ''
+      (setq standard-indent 2)
+    '';
+  };
+
   programs.dircolors.enableZshIntegration = true;
   programs.starship.enable = true;
   programs.starship.enableZshIntegration = true;
@@ -276,8 +289,8 @@
   };
   };
 
-  services.picom.enable = true;
-  services.picom.backend = "glx";
+  #services.picom.enable = true;
+  #services.picom.backend = "glx";
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;

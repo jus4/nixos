@@ -124,6 +124,11 @@
       packages = [ pkgs.dconf ];
     };
 
+    emacs = {
+      enable = true;
+      package = pkgs.emacs;
+    };
+
     # Configure keymap in X11
     xserver = {
       enable = true;
@@ -140,6 +145,7 @@
     };
 
     blueman.enable = true;
+    hardware.bolt.enable = true;
 
   };
 

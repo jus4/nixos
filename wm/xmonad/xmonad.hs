@@ -104,20 +104,20 @@ myScratchPads = [
     findTerm = title =? "scratchpad"
     manageTerm = customFloating $ W.RationalRect l t w h
                where
-                 h = 0.9
-                 w = 0.9
-                 t = 0.95 -h
-                 l = 0.95 -w
+                 h = 1
+                 w = 1
+                 t = 1 -h
+                 l = 1 -w
     findEmacsScratch = title =? "emacs-scratch"
     -- spawnEmacsScratch = "emacsclient -a='' -nc -F='(quote (name . \"emacs-scratch\"))' "
     -- spawnEmacsScratch = "emacsclient --alternate-editor='' --no-wait --create-frame --frame-parameters='(quote (name . \"emacs-scratch\"))'"
     spawnEmacsScratch = "emacsclient --alternate-editor='' -nc --frame-parameters='(quote (name . \"emacs-scratch\"))'"
     manageEmacs = customFloating $ W.RationalRect l t w h
                where
-                 h = 0.9
-                 w = 0.9
-                 t = 0.95 -h
-                 l = 0.95 -w
+                 h = 0.7
+                 w = 0.7
+                 t = 0.7 -h
+                 l = 0.7 -w
     spawnPav = "spotify"
     findPav = className=? "Spotify"
     managePav = customFloating $ W.RationalRect l t w h -- and I'd like it fixed using the geometry below
