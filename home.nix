@@ -28,6 +28,9 @@
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = [
+    pkgs.xclip
+    pkgs.lazygit
+
     pkgs.qutebrowser
     pkgs.google-chrome
     pkgs.polybar
@@ -117,6 +120,9 @@
     plugins.treesitter = {
       enable = true;
     };
+
+    clipboard.register = "unnamedplus";
+
     plugins.telescope = {
       enable = true;
       keymaps = {

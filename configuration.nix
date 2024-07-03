@@ -32,6 +32,8 @@
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
 
+  hardware.enableAllFirmware = true;
+
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "fi_FI.UTF-8";
     LC_IDENTIFICATION = "fi_FI.UTF-8";
@@ -53,6 +55,9 @@
     # use the example session manager (no others are packaged yet so this is enabled by default, no need to redefine it in your config for now)
     #media-session.enable = true;
   };
+
+  sound.enable = true;
+  nixpkgs.config.pulseaudio = true;
 
   # Configure console keymap
   console.keyMap = "fi";
@@ -92,6 +97,7 @@
     dunst
     picom
     pcre.dev
+    node2nix
     zsh
     helix
     typescript
@@ -103,6 +109,7 @@
     xorg.xrandr
     arandr
     git
+    openfortivpn
     nodejs
     alacritty
     alacritty-theme
