@@ -41,6 +41,14 @@
 
     pkgs.pulsemixer
 
+    # Gaming
+    pkgs.lutris
+    pkgs.heroic
+    pkgs.steam
+
+    # Grep for search
+    pkgs.ripgrep
+
     # xmonad
     pkgs.dialog # Dialog boxes on the terminal (to show key bindings)
     pkgs.networkmanager_dmenu # networkmanager on dmenu
@@ -56,6 +64,12 @@
 
     # Notifications send
     pkgs.libnotify
+
+    # Communication
+    pkgs.discord
+
+    #music
+    pkgs.spotify
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
