@@ -78,8 +78,8 @@ myConfig =
                         ("<XF86AudioLowerVolume>", spawn "amixer set Master 2%-"),
                         ("<XF86AudioRaiseVolume>", spawn "amixer set Master 2%+"),
                         -- Brightness
-                        ("<XF86MonBrightnessDown>", spawn "lux -s 10%"),
-                        ("<XF86MonBrightnessUp>", spawn "lux -a 10%"),
+                        ("<XF86MonBrightnessDown>", spawn "light -U 5%"),
+                        ("<XF86MonBrightnessUp>", spawn "light -A 5%"),
                         -- Dynamic Workspace
                         ("M-y n", promptWSGroupAdd myXPConfig "Name this group: "),
                         ("M-y g", promptWSGroupView myXPConfig "Go to group: "),
