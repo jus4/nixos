@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ pkgs, lib, ... }:
 
 {
 
@@ -28,8 +28,13 @@
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = [
+    pkgs.zip
+    pkgs.unzip
     pkgs.xclip
     pkgs.lazygit
+    pkgs.mkcert
+
+    pkgs.nix-tree
 
     pkgs.qutebrowser
     pkgs.google-chrome
@@ -41,10 +46,31 @@
 
     pkgs.pulsemixer
 
+    #browser
+    pkgs.links2
+    pkgs.lynx
+
+    #share files to phone
+    pkgs.localsend
+
+    # Time tracking
+    pkgs.timewarrior
+
+    # pkgs.teams
+
     # Gaming
     pkgs.lutris
     pkgs.heroic
     pkgs.steam
+
+    #postman
+    pkgs.postman
+
+    #office 
+    pkgs.libreoffice
+
+    #file browsing
+    pkgs.xfce.thunar
 
     # Grep for search
     pkgs.ripgrep
@@ -59,6 +85,11 @@
     pkgs.xorg.xmodmap # keymaps modifier
     pkgs.xorg.xrandr # display manager (X Resize and Rotate protocol)
 
+    # network
+    pkgs.networkmanagerapplet
+    pkgs.whois
+    pkgs.dig
+
     # dropbox
     pkgs.maestral
 
@@ -70,6 +101,18 @@
 
     #music
     pkgs.spotify
+
+    #screenshot
+    pkgs.flameshot
+
+    # camera
+    pkgs.gphoto2fs
+    pkgs.gphoto2
+
+    #video
+    pkgs.mpv
+    pkgs.vlc
+    pkgs.shotcut
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
@@ -122,13 +165,24 @@
 
   programs.alacritty = import ./pkgs/alacritty/default.nix { inherit pkgs; };
 
+  programs = {
+    direnv = {
+      enable = true;
+      enableBashIntegration = true; # see note on other shells below
+      nix-direnv.enable = true;
+    };
+
+    bash.enable = true; # see note on other shells below
+  };
+
   programs.nixvim = {
     enable = true;
     globals = {
       mapleader = " ";
       maplocalleader = " ";
     };
-    colorschemes.gruvbox.enable = true;
+    #colorschemes.gruvbox.enable = true;
+    colorschemes.tokyonight.enable = true;
     plugins.lightline.enable = true;
     extraConfigLua = lib.fileContents ./neovim/init.lua;
     plugins.treesitter = {
@@ -153,9 +207,65 @@
         "<C-f>" = "live_grep";
       };
     };
+
+
     plugins.barbar = {
       enable = true;
     };
+
+    plugins.comment = {
+      enable = true;
+    };
+
+	  plugins = {
+	  	luasnip = {
+	  		enable = true;
+	  		extraConfig = {
+	  			enable_autosnippets = true;
+	  			store_selection_keys = "<Tab>";
+	  		};
+	  		fromVscode = [
+	  		{
+	  			lazyLoad = true;
+	  			paths = "${pkgs.vimPlugins.friendly-snippets}";
+	  		}
+	  		];
+	  	};
+	  	cmp_luasnip = {
+	  		enable = true;
+	  	};
+	  	cmp-nvim-lsp = {
+	  		enable = true;
+	  	};
+	  	cmp = {
+	  		enable = true;
+	  		autoEnableSources = true;
+	  		settings = {
+	  			mapping = {
+	  				"<Tab>" = "cmp.mapping(cmp.mapping.select_next_item(), {'i', 's'})";
+	  				"<S-Tab>" = "cmp.mapping(cmp.mapping.select_prev_item(), {'i', 's'})";
+	  				"<CR>" = "cmp.mapping.confirm({ select = true })";
+	  			};
+	  			sources = [
+	  			  {name = "nvim_lsp";}
+	  			  {name = "luasnip";}
+	  			  {name = "path";}
+	  			  {name = "buffer";}
+	  			];
+          snippet.expand = ''function(args) require('luasnip').lsp_expand(args.body) end'';
+          expand = ''
+            function(args)
+              require('luasnip').lsp_expand(args.body)
+            end
+          '';
+	  		};
+	  	};
+	  };
+
+    plugins.lsp-lines = {
+      enable = true;
+    };
+
     plugins.lsp = {
       enable = true;
       keymaps = {
@@ -181,6 +291,18 @@
 	      graphql.enable = true;
 	      html.enable = true;
 	      nixd.enable = true;
+        gopls.enable = true;
+        prismals.enable = true;
+      };
+    };
+
+    # plugins.lsp-format.enable = true;
+
+    plugins.none-ls = {
+      enable = true;
+      # enableLspFormat = true;
+      sources = {
+        diagnostics.stylelint.enable = true;
       };
     };
   };
@@ -285,7 +407,6 @@
     enable = true;
   };
 
-
   programs.helix = {
   enable = true;
   settings = {
@@ -309,8 +430,6 @@
   };
   };
 
-  #services.picom.enable = true;
-  #services.picom.backend = "glx";
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;

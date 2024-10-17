@@ -17,6 +17,13 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "juice"; # Define your hostname.
+  environment.etc."ppp/options".text = "ipcp-accept-remote";
+  networking.extraHosts =
+  ''
+    127.0.0.1 vcap.me
+    127.0.0.1 gate.vcap.me
+    127.0.0.1 stage.vcap.me
+  '';
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -25,6 +32,16 @@
 
   # Enable networking
   networking.networkmanager.enable = true;
+
+  # networking.networkmanager.insertNameservers = [
+  #   "10.1.0.1"  # Primary DNS
+  #   "10.1.0.6"  # Primary DNS
+  # ];
+
+  # networking = {
+  #   nameservers = [
+  #   ];
+  # };
 
   # Set your time zone.
   time.timeZone = "Europe/Helsinki";
@@ -71,12 +88,21 @@
   users.users.juice = {
     isNormalUser = true;
     description = "Juice";
-    extraGroups = [ "networkmanager" "wheel" "video" ];
+    extraGroups = [ "networkmanager" "wheel" "video" "storage" "camera"];
     packages = with pkgs; [ ];
   };
 
   environment.shells = with pkgs; [ bash zsh ];
   users.defaultUserShell = pkgs.zsh;
+
+  boot.extraModprobeConfig = ''
+      options hid_apple fnmode=2
+  '';
+  boot.kernelModules = [ "hid-apple"  ];
+  systemd.services.bluetooth.serviceConfig.ExecStart = [
+    ""
+    "${pkgs.bluez}/libexec/bluetooth/bluetoothd --noplugin=sap,avrcp"
+  ];
 
   programs = {
     zsh = {
@@ -95,6 +121,9 @@
   programs.xss-lock.enable = true;
   programs.xss-lock.lockerCommand = "/run/wrappers/bin/slock";
 
+  boot.kernelParams = [ "button.lid_init_state=open" ];
+
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
@@ -102,6 +131,7 @@
   # $ nix search wget
   fonts.packages = with pkgs; [ nerdfonts ];
   environment.systemPackages = with pkgs; [
+    zlib
     acpi
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     nerdfonts
@@ -125,11 +155,15 @@
     git
     go
     openfortivpn
+    openconnect
+    openssl
     nodejs
+    ruby
     neofetch
     alacritty
     alacritty-theme
     firefox
+    lutris
     brave
     dmenu
     pciutils
@@ -138,11 +172,21 @@
     lshw
   ];
 
+  # Testing node node_modules
+  programs.nix-ld.enable = true;
+
   services = {
     printing.enable = true;
 
     gnome.gnome-keyring.enable = true;
     upower.enable = true;
+
+    #picom = {
+    #  enable = true;
+    #  backend = "glx";
+    #};
+
+    resolved.enable = true;
 
     dbus = {
       enable = true;
@@ -158,6 +202,7 @@
     xserver = {
       enable = true;
       layout = "fi";
+      imwheel.enable = true;
       windowManager.xmonad.enable = true;
       windowManager.xmonad.enableContribAndExtras = true;
       xkbVariant = "";
@@ -166,7 +211,7 @@
 
       libinput = {
         enable = true;
-        disableWhileTyping = true;
+        #disableWhileTyping = true;
       };
 
     };
@@ -174,9 +219,42 @@
     blueman.enable = true;
     hardware.bolt.enable = true;
 
+
+    devmon.enable = true;
+    gvfs.enable = true;
+    udisks2.enable = true;
+
   };
 
-  hardware.bluetooth.enable = true;
+  # network setup fest remove if not working
+  # systemd.services.wpa_supplicant.environment.OPENSSL_CONF = pkgs.writeText "openssl.cnf" ''
+  #   openssl_conf = openssl_init
+  #   [openssl_init]
+  #   ssl_conf = ssl_sect
+  #   [ssl_sect]
+  #   system_default = system_default_sect
+  #   [system_default_sect]
+  #   Options = UnsafeLegacyRenegotiation
+  #   [system_default_sect]
+  #   CipherString = Default:@SECLEVEL=0
+  # '';
+
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+    package = pkgs.bluez;
+    settings.Policy.AutoEnable = "true";
+    # fastConnectable = true;
+    settings.General = {
+      Name = "Juice-thinkpad-p14s";
+      Enable = "Source,Sink,Media,Socket";
+      Experimental = "true";
+      ReconnectAttempts = 7;
+      FastConnectable = "true";
+      ReconnectIntervals = 5000;
+      # KernelExperimental = "true";
+    };
+  };
 
   systemd.services.upower.enable = true;
 
@@ -184,7 +262,7 @@
     modesetting.enable = true;
 
     # Nvidia power management. Experimental, and can cause sleep/suspend to fail.
-    powerManagement.enable = false;
+    # powerManagement.enable = false; // did cause sleep/suspend to fail ?
     # Fine-grained power management. Turns off GPU when not in use.
     # Experimental and only works on modern Nvidia GPUs (Turing or newer).
     powerManagement.finegrained = false;
@@ -196,10 +274,10 @@
     # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus 
     # Only available from driver 515.43.04+
     # Currently alpha-quality/buggy, so false is currently the recommended setting.
-    open = false;
+    open = true;
 
     # Enable the Nvidia settings menu,
-	# accessible via `nvidia-settings`.
+	  # accessible via `nvidia-settings`.
     nvidiaSettings = true;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
