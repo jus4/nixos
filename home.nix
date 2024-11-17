@@ -33,6 +33,7 @@
     pkgs.xclip
     pkgs.lazygit
     pkgs.mkcert
+    pkgs.tmux
 
     pkgs.nix-tree
 
@@ -45,6 +46,8 @@
     pkgs.paprefs # pulseaudio preferences
 
     pkgs.pulsemixer
+
+    pkgs.appimage-run
 
     #browser
     pkgs.links2
@@ -113,6 +116,17 @@
     pkgs.mpv
     pkgs.vlc
     pkgs.shotcut
+
+    #torrent
+    pkgs.deluged
+    pkgs.qbittorrent
+
+    # Golang extra
+    pkgs.air
+    pkgs.templ
+
+    # Tailwindcss cli 
+    pkgs.tailwindcss
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
@@ -293,6 +307,8 @@
 	      nixd.enable = true;
         gopls.enable = true;
         prismals.enable = true;
+        pyright.enable = true;
+        templ.enable = true;
       };
     };
 

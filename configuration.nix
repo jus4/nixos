@@ -88,7 +88,7 @@
   users.users.juice = {
     isNormalUser = true;
     description = "Juice";
-    extraGroups = [ "networkmanager" "wheel" "video" "storage" "camera"];
+    extraGroups = [ "networkmanager" "wheel" "video" "storage" "camera" "docker"];
     packages = with pkgs; [ ];
   };
 
@@ -111,6 +111,7 @@
   };
 
   virtualisation.virtualbox.host.enable = true;
+  virtualisation.docker.enable = true;
   users.extraGroups.vboxusers.members = [ "juice" ];
 
   #light
@@ -202,7 +203,7 @@
     xserver = {
       enable = true;
       layout = "fi";
-      imwheel.enable = true;
+      # imwheel.enable = true;
       windowManager.xmonad.enable = true;
       windowManager.xmonad.enableContribAndExtras = true;
       xkbVariant = "";
