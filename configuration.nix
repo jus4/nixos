@@ -104,6 +104,10 @@
     "${pkgs.bluez}/libexec/bluetooth/bluetoothd --noplugin=sap,avrcp"
   ];
 
+  # Lates kernel
+  # boot.kernelPackages = pkgs.linuxPackages_latest;
+  # boot.kernelPackages = pkgs.linuxPackages_xanmod_latest;
+
   programs = {
     zsh = {
       enable = true;
@@ -254,6 +258,8 @@
       FastConnectable = "true";
       ReconnectIntervals = 5000;
       # KernelExperimental = "true";
+      JustWorksRepairing = "always";
+      MultiProfile = "multiple";
     };
   };
 
