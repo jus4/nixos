@@ -53,6 +53,9 @@
     pkgs.links2
     pkgs.lynx
 
+    #Free with no ads
+    pkgs.freetube
+
     #share files to phone
     pkgs.localsend
 
