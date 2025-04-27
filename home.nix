@@ -34,6 +34,13 @@
     pkgs.lazygit
     pkgs.mkcert
     pkgs.tmux
+    pkgs.calc
+
+    pkgs.xorg.xev
+    pkgs.input-remapper
+    pkgs.evtest
+
+    pkgs.lm_sensors
 
     pkgs.nix-tree
 
@@ -44,6 +51,11 @@
 
     pkgs.pavucontrol # pulseaudio volume control
     pkgs.paprefs # pulseaudio preferences
+
+    pkgs.xbindkeys
+    pkgs.xbindkeys-config
+    pkgs.xdotool
+
 
     pkgs.pulsemixer
 
@@ -123,11 +135,11 @@
 
     #torrent
     pkgs.deluged
-    pkgs.qbittorrent
+    # pkgs.qbittorrent
 
     # Golang extra
-    pkgs.air
-    pkgs.templ
+    # pkgs.air
+    # pkgs.templ
 
     # Tailwindcss cli 
     pkgs.tailwindcss
@@ -148,18 +160,27 @@
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.
-  home.file = {
-    # # Building this configuration will create a copy of 'dotfiles/screenrc' in
-    # # the Nix store. Activating the configuration will then make '~/.screenrc' a
-    # # symlink to the Nix store copy.
-    # ".screenrc".source = dotfiles/screenrc;
-
-    # # You can also set the file content immediately.
-    # ".gradle/gradle.properties".text = ''
-    #   org.gradle.console=verbose
-    #   org.gradle.daemon.idletimeout=3600000
-    # '';
-  };
+  # home.file = {
+  #   # ".config/powerline/themes/tmux/default.json".source = ./tmux/powerline-tmux-theme.json;
+  #   ".config/powerline/themes/tmux/default.json" = {
+  #   source = ./tmux/powerline-tmux-theme.json;  # Relative to your config dir
+  #   force = true;  # Overwrite existing files if needed
+  # };
+  #   # # Building this configuration will create a copy of 'dotfiles/screenrc' in
+  #   # # the Nix store. Activating the configuration will then make '~/.screenrc' a
+  #   # # symlink to the Nix store copy.
+  #   # ".screenrc".source = dotfiles/screenrc;
+  #
+  #   # # You can also set the file content immediately.
+  #   # ".gradle/gradle.properties".text = ''
+  #   #   org.gradle.console=verbose
+  #   #   org.gradle.daemon.idletimeout=3600000
+  #   # '';
+  # };
+  # home.file.".config/powerline/themes/tmux/default.json" = {
+  #   source = ./tmux/powerline-tmux-theme.json;  # Relative to ~/.dotfiles/
+  #   force = true;
+  # };
 
   # Home Manager can also manage your environment variables through
   # 'home.sessionVariables'. These will be explicitly sourced when using a
@@ -178,7 +199,6 @@
   #  /etc/profiles/per-user/juice/etc/profile.d/hm-session-vars.sh
   #
   home.sessionVariables = {
-    # EDITOR = "emacs";
   };
 
   programs.alacritty = import ./pkgs/alacritty/default.nix { inherit pkgs; };
@@ -200,6 +220,11 @@
       ];
     extraConfig = ''
       set -g @plugin 'erikw/tmux-powerline'
+      bind r source-file ~/.config/tmux/tmux.conf \; display "Reloaded!"
+      set-option -g status-position top 
+      unbind C-s
+      set -g prefix C-s
+      bind C-s send-prefix
     '';
   };
 
@@ -298,6 +323,7 @@
           '';
 	  		};
 	  	};
+
 	  };
 
     plugins.lsp-lines = {
@@ -333,6 +359,7 @@
         prismals.enable = true;
         pyright.enable = true;
         templ.enable = true;
+        typos-lsp.enable = true;
       };
     };
 

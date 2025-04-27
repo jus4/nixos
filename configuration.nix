@@ -4,6 +4,7 @@
 
 { config, pkgs, ... }:
 
+
 {
   imports = [ # Include the results of the hardware scan.
     ./hardware-configuration.nix
@@ -18,6 +19,7 @@
 
   networking.hostName = "juice"; # Define your hostname.
   environment.etc."ppp/options".text = "ipcp-accept-remote";
+  
   networking.extraHosts =
   ''
     127.0.0.1 vcap.me
@@ -105,8 +107,7 @@
   ];
 
   # Lates kernel
-  # boot.kernelPackages = pkgs.linuxPackages_latest;
-  # boot.kernelPackages = pkgs.linuxPackages_xanmod_latest;
+  boot.kernelPackages = pkgs.linuxPackages_6_12;
 
   programs = {
     zsh = {
@@ -133,7 +134,6 @@
   nixpkgs.config.allowUnfree = true;
 
   # List packages installed in system profile. To search, run:
-  # $ nix search wget
   fonts.packages = with pkgs; [ nerdfonts ];
   environment.systemPackages = with pkgs; [
     zlib
@@ -149,8 +149,7 @@
     zsh
     helix
     typescript
-    #nodePackages_latest.typescript-language-server
-    #nodePackages_latest.bash-language-server
+    findutils
     starship
     slack
     slock
@@ -175,6 +174,7 @@
     rofi
     wget
     lshw
+
   ];
 
   # Testing node node_modules
@@ -184,12 +184,14 @@
     printing.enable = true;
 
     gnome.gnome-keyring.enable = true;
-    upower.enable = true;
-
-    #picom = {
-    #  enable = true;
-    #  backend = "glx";
-    #};
+    upower = { 
+      enable = true;
+      criticalPowerAction = "Hibernate";
+      usePercentageForPolicy = true;
+      percentageAction = 80;
+      percentageLow = 80;
+      percentageCritical = 77;
+    };
 
     resolved.enable = true;
 
@@ -207,7 +209,7 @@
     xserver = {
       enable = true;
       layout = "fi";
-      # imwheel.enable = true;
+      imwheel.enable = true;
       windowManager.xmonad.enable = true;
       windowManager.xmonad.enableContribAndExtras = true;
       xkbVariant = "";
@@ -216,8 +218,11 @@
 
       libinput = {
         enable = true;
-        #disableWhileTyping = true;
+        touchpad.middleEmulation = true;
+        touchpad.naturalScrolling = true;
+        disableWhileTyping = true;
       };
+
 
     };
 
@@ -231,23 +236,10 @@
 
   };
 
-  # network setup fest remove if not working
-  # systemd.services.wpa_supplicant.environment.OPENSSL_CONF = pkgs.writeText "openssl.cnf" ''
-  #   openssl_conf = openssl_init
-  #   [openssl_init]
-  #   ssl_conf = ssl_sect
-  #   [ssl_sect]
-  #   system_default = system_default_sect
-  #   [system_default_sect]
-  #   Options = UnsafeLegacyRenegotiation
-  #   [system_default_sect]
-  #   CipherString = Default:@SECLEVEL=0
-  # '';
-
   hardware.bluetooth = {
+    package = pkgs.bluez;
     enable = true;
     powerOnBoot = true;
-    package = pkgs.bluez;
     settings.Policy.AutoEnable = "true";
     # fastConnectable = true;
     settings.General = {
@@ -281,14 +273,18 @@
     # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus 
     # Only available from driver 515.43.04+
     # Currently alpha-quality/buggy, so false is currently the recommended setting.
-    open = true;
+    open = false;
+    # open = true;
 
     # Enable the Nvidia settings menu,
 	  # accessible via `nvidia-settings`.
     nvidiaSettings = true;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    # package = pkgs.nvidiaPackages.stable; 
+    # package = config.boot.kernelPackages.nvidiaPackages.stable;
+
+    package = config.boot.kernelPackages.nvidiaPackages.beta;
 
     prime = { 
       offload.enable = true;
