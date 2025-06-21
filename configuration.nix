@@ -2,13 +2,14 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
-
+{  config, inputs, pkgs, ... }:
 
 {
   imports = [ # Include the results of the hardware scan.
     ./hardware-configuration.nix
-  ];
+    ./strongswan/strongswan.nix
+    ];
+
 
   # Bootloader.
   #boot.loader.grub.enable = true;
@@ -18,6 +19,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "juice"; # Define your hostname.
+  networking.useNetworkd = true;
   environment.etc."ppp/options".text = "ipcp-accept-remote";
   
   networking.extraHosts =
@@ -26,24 +28,12 @@
     127.0.0.1 gate.vcap.me
     127.0.0.1 stage.vcap.me
   '';
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Enable networking
-  networking.networkmanager.enable = true;
-
-  # networking.networkmanager.insertNameservers = [
-  #   "10.1.0.1"  # Primary DNS
-  #   "10.1.0.6"  # Primary DNS
-  # ];
-
-  # networking = {
-  #   nameservers = [
-  #   ];
-  # };
+  networking.networkmanager = {
+    enable = true;
+    # enableStrongSwan = true;
+  };
 
   # Set your time zone.
   time.timeZone = "Europe/Helsinki";
@@ -106,7 +96,7 @@
     "${pkgs.bluez}/libexec/bluetooth/bluetoothd --noplugin=sap,avrcp"
   ];
 
-  # Lates kernel
+  # Latest kernel
   boot.kernelPackages = pkgs.linuxPackages_6_12;
 
   programs = {
@@ -174,14 +164,76 @@
     rofi
     wget
     lshw
-
+    strongswan
+    sops
+    age
   ];
 
-  # Testing node node_modules
+  # NixLd 
   programs.nix-ld.enable = true;
 
+  networking.resolvconf.enable = false;
+
   services = {
-    printing.enable = true;
+
+    # Open SSH
+    # openssh.enable = true;
+
+    # strongswan = {
+    #   enable = true;
+    #   secrets = [ "/etc/ipsec.d/ipsec.secrets" ];
+    #   setup = {
+    #     strictcrlpolicy = "yes";
+    #     uniqueids = "yes";
+    #   };
+    #
+    #   connections.crasman = {
+    #     # Connection Basics
+    #     auto = "add";  # Changed from "add" for automatic connection
+    #     type = "tunnel";
+    #     keyexchange = "ikev1";
+    #
+    #     left = "%any";
+    #     leftauth = "psk";
+    #     leftauth2 = "xauth";
+    #     leftsourceip = "%config";
+    #     leftid = "vpnuser@local";
+    #
+    #     # Remote (Server) Settings
+    #     right = "vpn1.crasman.fi";
+    #     rightid = "79.134.111.186";
+    #     rightsubnet = "0.0.0.0/0";
+    #     rightauth = "psk";
+    #
+    #     # XAuth Configuration
+    #     # xauth_identity =  "jussi.leskinen@crasman.fi";
+    #     # xauth_identity =  "jussi.leskinen@crasman.fi";
+    #     xauth_identity = /run/secrets/strongswan_xauth_identity;
+    #
+    #     # Security Parameters
+    #     ike = "aes256-sha256-modp1536";  # Changed from sha512 (more compatible)
+    #     esp = "aes256-sha256-modp1536";
+    #     rekey = "yes";
+    #     reauth = "yes";
+    #
+    #     # NAT/DPD Settings
+    #     forceencaps = "yes";  # Critical for NAT traversal
+    #     fragmentation = "yes";
+    #     dpdaction = "restart";
+    #     dpddelay = "10s";
+    #     dpdtimeout = "60s";
+    #
+    #     # Timeouts
+    #     ikelifetime = "14400s";
+    #     lifetime = "3600s";
+    #   };
+    #
+    # };
+
+    printing = {
+      drivers = [ pkgs.hplip ];
+      enable = true;
+    };
 
     gnome.gnome-keyring.enable = true;
     upower = { 
@@ -193,16 +245,13 @@
       percentageCritical = 77;
     };
 
-    resolved.enable = true;
+    resolved = {
+      enable = true;
+    };
 
     dbus = {
       enable = true;
       packages = [ pkgs.dconf ];
-    };
-
-    emacs = {
-      enable = true;
-      package = pkgs.emacs;
     };
 
     # Configure keymap in X11
@@ -222,19 +271,17 @@
         touchpad.naturalScrolling = true;
         disableWhileTyping = true;
       };
-
-
     };
 
     blueman.enable = true;
     hardware.bolt.enable = true;
-
-
     devmon.enable = true;
     gvfs.enable = true;
     udisks2.enable = true;
-
   };
+
+  # hardware.printers.ensurePrinters = true;
+  hardware.sane.enable = true;
 
   hardware.bluetooth = {
     package = pkgs.bluez;
@@ -255,7 +302,24 @@
     };
   };
 
-  systemd.services.upower.enable = true;
+  # TODO fix not working yeat
+  systemd.services = {
+    upower.enable = true;
+    suspend-on-low-battery = {
+      description = "Suspend on low battery";
+      serviceConfig = {
+        ExecStart = "./suspend_on_low.sh";
+      };
+    };
+  };
+
+  systemd.timers.suspend-on-low-battery = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "5min";
+      OnUnitActiveSec = "1min";
+    };
+  };
 
   hardware.nvidia = {
     modesetting.enable = true;
@@ -274,7 +338,6 @@
     # Only available from driver 515.43.04+
     # Currently alpha-quality/buggy, so false is currently the recommended setting.
     open = false;
-    # open = true;
 
     # Enable the Nvidia settings menu,
 	  # accessible via `nvidia-settings`.
@@ -297,19 +360,6 @@
 	  };
   };
 
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
-
-  # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
-
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
@@ -324,5 +374,5 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "24.05"; # Did you read the comment?
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
+  networking.firewall.allowedUDPPorts = [ 500 4500 ];
 }

@@ -11,6 +11,10 @@
       url = "github:nix-community/nixvim/nixos-24.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =  inputs@{ self, nixpkgs, home-manager, nixvim, ... }: 
@@ -22,7 +26,10 @@
     nixosConfigurations = {
       juice = lib.nixosSystem {
         inherit system;
-        modules = [ ./configuration.nix ];
+        specialArgs = { inherit inputs;};
+        modules = [ 
+          ./configuration.nix 
+        ];
       };
     };
     homeConfigurations = {

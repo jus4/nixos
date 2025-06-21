@@ -45,6 +45,7 @@
     pkgs.nix-tree
 
     pkgs.qutebrowser
+    # pkgs.ladybird
     pkgs.google-chrome
     pkgs.polybar
     pkgs.trayer
@@ -124,6 +125,9 @@
     #screenshot
     pkgs.flameshot
 
+    #pdf
+    pkgs.kdePackages.okular
+
     # camera
     pkgs.gphoto2fs
     pkgs.gphoto2
@@ -202,6 +206,7 @@
   };
 
   programs.alacritty = import ./pkgs/alacritty/default.nix { inherit pkgs; };
+
 
   # Tmux
   programs.tmux = {
@@ -415,13 +420,6 @@
       style = "bg:#33658A";
       format = "[ ♥ $time ]($style)";
     };
-    #shell = {
-    #  disabled = false;
-    #  format = "$indicator";
-    #  fish_indicator = "";
-    #  bash_indicator = "[BASH](bright-white) ";
-    #  zsh_indicator = "[ZSH](bright-white) ";
-    #};
     username = {
       show_always = true;
       style_user = "bright-white bold";
@@ -475,26 +473,26 @@
   };
 
   programs.helix = {
-  enable = true;
-  settings = {
-    theme = "autumn_night_transparent";
-    editor.cursor-shape = {
-      normal = "block";
-      insert = "bar";
-      select = "underline";
+    enable = true;
+    settings = {
+      theme = "autumn_night_transparent";
+      editor.cursor-shape = {
+        normal = "block";
+        insert = "bar";
+        select = "underline";
+      };
     };
-  };
-  languages.language = [{
-    name = "nix";
-    auto-format = true;
-    formatter.command = "${pkgs.nixfmt}/bin/nixfmt";
-  }];
-  themes = {
-    autumn_night_transparent = {
-      "inherits" = "autumn_night";
-      "ui.background" = { };
+    languages.language = [{
+      name = "nix";
+      auto-format = true;
+      formatter.command = "${pkgs.nixfmt}/bin/nixfmt";
+    }];
+    themes = {
+      autumn_night_transparent = {
+        "inherits" = "autumn_night";
+        "ui.background" = { };
+      };
     };
-  };
   };
 
 
