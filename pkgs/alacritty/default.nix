@@ -33,7 +33,7 @@
         foreground = "0xEBEBEB";
       };
       cursor = {
-        text   = "0xFF261E";
+        text   = "0x000000";
         cursor = "0xFF261E";
       };
       normal = {

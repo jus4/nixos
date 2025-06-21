@@ -1,6 +1,12 @@
-{ config, pkgs, lib, ... }:
+{ pkgs, lib, ... }:
 
 {
+
+  imports = [
+    ./wm/xmonad
+    ./wm/polybar
+    ./services/dunst
+  ];
 
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
@@ -16,12 +22,131 @@
   # release notes.
   home.stateVersion = "24.05"; # Please read the comment before changing.
 
+  # Allow unfree packages
+  nixpkgs.config.allowUnfree = true;
+
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = [
-    # # Adds the 'hello' command to your environment. It prints a friendly
-    # # "Hello, world!" when run.
-    # pkgs.hello
+    pkgs.zip
+    pkgs.unzip
+    pkgs.xclip
+    pkgs.lazygit
+    pkgs.mkcert
+    pkgs.tmux
+    pkgs.calc
+
+    pkgs.xorg.xev
+    pkgs.input-remapper
+    pkgs.evtest
+
+    pkgs.lm_sensors
+
+    pkgs.nix-tree
+
+    pkgs.qutebrowser
+    # pkgs.ladybird
+    pkgs.google-chrome
+    pkgs.polybar
+    pkgs.trayer
+
+    pkgs.pavucontrol # pulseaudio volume control
+    pkgs.paprefs # pulseaudio preferences
+
+    pkgs.xbindkeys
+    pkgs.xbindkeys-config
+    pkgs.xdotool
+
+
+    pkgs.pulsemixer
+
+    pkgs.appimage-run
+
+    #browser
+    pkgs.links2
+    pkgs.lynx
+
+    #Free with no ads
+    pkgs.freetube
+
+    #share files to phone
+    pkgs.localsend
+
+    # Time tracking
+    pkgs.timewarrior
+
+    # pkgs.teams
+
+    # Gaming
+    pkgs.lutris
+    pkgs.heroic
+    pkgs.steam
+
+    #postman
+    pkgs.postman
+
+    #office 
+    pkgs.libreoffice
+
+    #file browsing
+    pkgs.xfce.thunar
+
+    # Grep for search
+    pkgs.ripgrep
+
+    # xmonad
+    pkgs.dialog # Dialog boxes on the terminal (to show key bindings)
+    pkgs.networkmanager_dmenu # networkmanager on dmenu
+    pkgs.networkmanagerapplet # networkmanager applet
+    pkgs.nitrogen # wallpaper manager
+    pkgs.xcape # keymaps modifier
+    pkgs.xorg.xkbcomp # keymaps modifier
+    pkgs.xorg.xmodmap # keymaps modifier
+    pkgs.xorg.xrandr # display manager (X Resize and Rotate protocol)
+
+    # network
+    pkgs.networkmanagerapplet
+    pkgs.whois
+    pkgs.dig
+
+    # dropbox
+    pkgs.maestral
+
+    # Notifications send
+    pkgs.libnotify
+
+    # Communication
+    pkgs.discord
+    pkgs.whatsapp-for-linux
+
+    #music
+    pkgs.spotify
+
+    #screenshot
+    pkgs.flameshot
+
+    #pdf
+    pkgs.kdePackages.okular
+
+    # camera
+    pkgs.gphoto2fs
+    pkgs.gphoto2
+
+    #video
+    pkgs.mpv
+    pkgs.vlc
+    pkgs.shotcut
+
+    #torrent
+    pkgs.deluged
+    # pkgs.qbittorrent
+
+    # Golang extra
+    # pkgs.air
+    # pkgs.templ
+
+    # Tailwindcss cli 
+    pkgs.tailwindcss
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
@@ -39,18 +164,27 @@
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.
-  home.file = {
-    # # Building this configuration will create a copy of 'dotfiles/screenrc' in
-    # # the Nix store. Activating the configuration will then make '~/.screenrc' a
-    # # symlink to the Nix store copy.
-    # ".screenrc".source = dotfiles/screenrc;
-
-    # # You can also set the file content immediately.
-    # ".gradle/gradle.properties".text = ''
-    #   org.gradle.console=verbose
-    #   org.gradle.daemon.idletimeout=3600000
-    # '';
-  };
+  # home.file = {
+  #   # ".config/powerline/themes/tmux/default.json".source = ./tmux/powerline-tmux-theme.json;
+  #   ".config/powerline/themes/tmux/default.json" = {
+  #   source = ./tmux/powerline-tmux-theme.json;  # Relative to your config dir
+  #   force = true;  # Overwrite existing files if needed
+  # };
+  #   # # Building this configuration will create a copy of 'dotfiles/screenrc' in
+  #   # # the Nix store. Activating the configuration will then make '~/.screenrc' a
+  #   # # symlink to the Nix store copy.
+  #   # ".screenrc".source = dotfiles/screenrc;
+  #
+  #   # # You can also set the file content immediately.
+  #   # ".gradle/gradle.properties".text = ''
+  #   #   org.gradle.console=verbose
+  #   #   org.gradle.daemon.idletimeout=3600000
+  #   # '';
+  # };
+  # home.file.".config/powerline/themes/tmux/default.json" = {
+  #   source = ./tmux/powerline-tmux-theme.json;  # Relative to ~/.dotfiles/
+  #   force = true;
+  # };
 
   # Home Manager can also manage your environment variables through
   # 'home.sessionVariables'. These will be explicitly sourced when using a
@@ -69,19 +203,45 @@
   #  /etc/profiles/per-user/juice/etc/profile.d/hm-session-vars.sh
   #
   home.sessionVariables = {
-    # EDITOR = "emacs";
   };
 
-  xsession.windowManager.xmonad.config = pkgs.writeText "xmonad.hs" ''
-    import XMonad
-
-    main :: IO()
-    main = xmonad $ def
-      {
-        terminal = "alacritty"
-      }
-  '';
   programs.alacritty = import ./pkgs/alacritty/default.nix { inherit pkgs; };
+
+
+  # Tmux
+  programs.tmux = {
+    enable = true;
+    terminal = "tmux-256color";
+    historyLimit = 100000;
+    # enableVim = true;
+    # tmuxPlugins.powerline.enable = true;
+    plugins = with pkgs;
+      [
+        tmuxPlugins.better-mouse-mode
+        tmuxPlugins.power-theme
+        tmuxPlugins.prefix-highlight
+        tmuxPlugins.sensible
+        tmuxPlugins.yank
+      ];
+    extraConfig = ''
+      set -g @plugin 'erikw/tmux-powerline'
+      bind r source-file ~/.config/tmux/tmux.conf \; display "Reloaded!"
+      set-option -g status-position top 
+      unbind C-s
+      set -g prefix C-s
+      bind C-s send-prefix
+    '';
+  };
+
+  programs = {
+    direnv = {
+      enable = true;
+      enableBashIntegration = true; # see note on other shells below
+      nix-direnv.enable = true;
+    };
+
+    bash.enable = true; # see note on other shells below
+  };
 
   programs.nixvim = {
     enable = true;
@@ -89,12 +249,16 @@
       mapleader = " ";
       maplocalleader = " ";
     };
-    colorschemes.gruvbox.enable = true;
+    #colorschemes.gruvbox.enable = true;
+    colorschemes.tokyonight.enable = true;
     plugins.lightline.enable = true;
     extraConfigLua = lib.fileContents ./neovim/init.lua;
     plugins.treesitter = {
       enable = true;
     };
+
+    clipboard.register = "unnamedplus";
+
     plugins.telescope = {
       enable = true;
       keymaps = {
@@ -110,19 +274,67 @@
         "<leader>p" = "oldfiles";
         "<C-f>" = "live_grep";
       };
-
-      #keymaps = {
-      #  "<leader>pf" = "find_files";
-#vim.keymap.set('n', '<leader>pf', builtin.find_files, {})
-#vim.keymap.set('n', '<C-p>', builtin.git_files, {})
-#vim.keymap.set('n', '<leader>ps', function()
-#	builtin.grep_string({ search = vim.fn.input("Grep > ")});
-#end)
-      #};
     };
+
+
     plugins.barbar = {
       enable = true;
     };
+
+    plugins.comment = {
+      enable = true;
+    };
+
+	  plugins = {
+	  	luasnip = {
+	  		enable = true;
+	  		extraConfig = {
+	  			enable_autosnippets = true;
+	  			store_selection_keys = "<Tab>";
+	  		};
+	  		fromVscode = [
+	  		{
+	  			lazyLoad = true;
+	  			paths = "${pkgs.vimPlugins.friendly-snippets}";
+	  		}
+	  		];
+	  	};
+	  	cmp_luasnip = {
+	  		enable = true;
+	  	};
+	  	cmp-nvim-lsp = {
+	  		enable = true;
+	  	};
+	  	cmp = {
+	  		enable = true;
+	  		autoEnableSources = true;
+	  		settings = {
+	  			mapping = {
+	  				"<Tab>" = "cmp.mapping(cmp.mapping.select_next_item(), {'i', 's'})";
+	  				"<S-Tab>" = "cmp.mapping(cmp.mapping.select_prev_item(), {'i', 's'})";
+	  				"<CR>" = "cmp.mapping.confirm({ select = true })";
+	  			};
+	  			sources = [
+	  			  {name = "nvim_lsp";}
+	  			  {name = "luasnip";}
+	  			  {name = "path";}
+	  			  {name = "buffer";}
+	  			];
+          snippet.expand = ''function(args) require('luasnip').lsp_expand(args.body) end'';
+          expand = ''
+            function(args)
+              require('luasnip').lsp_expand(args.body)
+            end
+          '';
+	  		};
+	  	};
+
+	  };
+
+    plugins.lsp-lines = {
+      enable = true;
+    };
+
     plugins.lsp = {
       enable = true;
       keymaps = {
@@ -148,23 +360,24 @@
 	      graphql.enable = true;
 	      html.enable = true;
 	      nixd.enable = true;
+        gopls.enable = true;
+        prismals.enable = true;
+        pyright.enable = true;
+        templ.enable = true;
+        typos-lsp.enable = true;
+      };
+    };
+
+    # plugins.lsp-format.enable = true;
+
+    plugins.none-ls = {
+      enable = true;
+      # enableLspFormat = true;
+      sources = {
+        diagnostics.stylelint.enable = true;
       };
     };
   };
-
-  #programs.alacritty.enable = true;
-  #programs.alacritty.settings = {
-  #  shell = {
-  #    #program: ${zsh}/bin/zsh 
-  #    program = "/run/current-system/sw/bin/zsh";
-  #  };
-  #  env.TERM = "xterm-256color";
-  #  font = {
-  #    size = 12;
-  #  };
-  #  scrolling.multiplier = 5;
-  #  selection.save_to_clipboard = true;
-  #};
 
   programs.zsh = {
     enable = true;
@@ -180,6 +393,14 @@
       ];
     };
     autosuggestion.enable = true;
+  };
+
+  programs.emacs = {
+    enable = true;
+    package = pkgs.emacs;  # replace with pkgs.emacs-gtk, or a version provided by the community overlay if desired.
+    extraConfig = ''
+      (setq standard-indent 2)
+    '';
   };
 
   programs.dircolors.enableZshIntegration = true;
@@ -199,13 +420,6 @@
       style = "bg:#33658A";
       format = "[ ♥ $time ]($style)";
     };
-    #shell = {
-    #  disabled = false;
-    #  format = "$indicator";
-    #  fish_indicator = "";
-    #  bash_indicator = "[BASH](bright-white) ";
-    #  zsh_indicator = "[ZSH](bright-white) ";
-    #};
     username = {
       show_always = true;
       style_user = "bright-white bold";
@@ -258,33 +472,29 @@
     enable = true;
   };
 
-
   programs.helix = {
-  enable = true;
-  settings = {
-    theme = "autumn_night_transparent";
-    editor.cursor-shape = {
-      normal = "block";
-      insert = "bar";
-      select = "underline";
+    enable = true;
+    settings = {
+      theme = "autumn_night_transparent";
+      editor.cursor-shape = {
+        normal = "block";
+        insert = "bar";
+        select = "underline";
+      };
     };
-  };
-  languages.language = [{
-    name = "nix";
-    auto-format = true;
-    formatter.command = "${pkgs.nixfmt}/bin/nixfmt";
-  }];
-  themes = {
-    autumn_night_transparent = {
-      "inherits" = "autumn_night";
-      "ui.background" = { };
+    languages.language = [{
+      name = "nix";
+      auto-format = true;
+      formatter.command = "${pkgs.nixfmt}/bin/nixfmt";
+    }];
+    themes = {
+      autumn_night_transparent = {
+        "inherits" = "autumn_night";
+        "ui.background" = { };
+      };
     };
-  };
   };
 
-  services.picom.enable = true;
-  services.picom.backend = "glx";
-  #picom.settings = builtins.readFile ./wm/picom/picom.conf;
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;

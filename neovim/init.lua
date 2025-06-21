@@ -14,5 +14,11 @@ vim.opt.clipboard = 'unnamedplus'
 vim.g.mapleader = " "
 vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
 vim.keymap.set("t","<Esc>", "<C-\\><C-n>")
+
+vim.filetype.add({ extension = { templ = "templ" } })
+-- lspconfig.templ.setup({
+--   filetypes = { "templ" },
+-- })
+
 --tnoremap <M-[> <Esc>
 --tnoremap <C-v><Esc> <Esc>
