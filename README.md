@@ -10,14 +10,13 @@ Still under major development but my basic setup for Nixos. Include home.nix for
 
 ## Editing
 - NixVim
-- Hydrogen ( not really used )
-- eMacs for notes ( setup incomplete )
+- eMacs for notes ( setup incomplete ), install doom Emacs manually
 
 ## System
 - NixLd for installing packages for node projects. The only sane way for project development that require building packages.
 - Strongswan config is included in the config but not in this repo. Remove the line from configuration.nix if you want install the setup.
 
 ## Install
-Remove the Strongswan from configuration.nix file in order to install because file no included in the repo. TODO included it in a private repo
+Remove the Strongswan from configuration.nix file in order to install because file no included in the repo. TODO include it in a private repo
 
 
