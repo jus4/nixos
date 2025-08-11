@@ -1,11 +1,16 @@
 { pkgs, lib, ... }:
 
 {
-
   imports = [
     ./wm/xmonad
     ./wm/polybar
     ./services/dunst
+    ./pkgs/tmux
+    ./pkgs/nixvim
+    ./pkgs/starship
+    ./pkgs/alacritty
+    ./pkgs/emacs
+    ./pkgs/zsh
   ];
 
   # Home Manager needs a bit of information about you and the paths it should
@@ -139,7 +144,6 @@
 
     #torrent
     pkgs.deluged
-    # pkgs.qbittorrent
 
     # Golang extra
     # pkgs.air
@@ -160,6 +164,13 @@
     # (pkgs.writeShellScriptBin "my-hello" ''
     #   echo "Hello, ${config.home.username}!"
     # '')
+    pkgs.nerdfonts
+    pkgs.font-awesome
+    pkgs.material-design-icons
+
+    # spell checking
+    pkgs.aspell
+    pkgs.aspellDicts.en
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
@@ -205,34 +216,6 @@
   home.sessionVariables = {
   };
 
-  programs.alacritty = import ./pkgs/alacritty/default.nix { inherit pkgs; };
-
-
-  # Tmux
-  programs.tmux = {
-    enable = true;
-    terminal = "tmux-256color";
-    historyLimit = 100000;
-    # enableVim = true;
-    # tmuxPlugins.powerline.enable = true;
-    plugins = with pkgs;
-      [
-        tmuxPlugins.better-mouse-mode
-        tmuxPlugins.power-theme
-        tmuxPlugins.prefix-highlight
-        tmuxPlugins.sensible
-        tmuxPlugins.yank
-      ];
-    extraConfig = ''
-      set -g @plugin 'erikw/tmux-powerline'
-      bind r source-file ~/.config/tmux/tmux.conf \; display "Reloaded!"
-      set-option -g status-position top 
-      unbind C-s
-      set -g prefix C-s
-      bind C-s send-prefix
-    '';
-  };
-
   programs = {
     direnv = {
       enable = true;
@@ -243,258 +226,9 @@
     bash.enable = true; # see note on other shells below
   };
 
-  programs.nixvim = {
-    enable = true;
-    globals = {
-      mapleader = " ";
-      maplocalleader = " ";
-    };
-    #colorschemes.gruvbox.enable = true;
-    colorschemes.tokyonight.enable = true;
-    plugins.lightline.enable = true;
-    extraConfigLua = lib.fileContents ./neovim/init.lua;
-    plugins.treesitter = {
-      enable = true;
-    };
-
-    clipboard.register = "unnamedplus";
-
-    plugins.telescope = {
-      enable = true;
-      keymaps = {
-        # Find files using Telescope command-line sugar.
-        "<leader>pf" = "find_files";
-        "<leader>fg" = "live_grep";
-        "<leader>b" = "buffers";
-        "<leader>fh" = "help_tags";
-        "<leader>fd" = "diagnostics";
-
-        # FZF like bindings
-        "<C-p>" = "git_files";
-        "<leader>p" = "oldfiles";
-        "<C-f>" = "live_grep";
-      };
-    };
-
-
-    plugins.barbar = {
-      enable = true;
-    };
-
-    plugins.comment = {
-      enable = true;
-    };
-
-	  plugins = {
-	  	luasnip = {
-	  		enable = true;
-	  		extraConfig = {
-	  			enable_autosnippets = true;
-	  			store_selection_keys = "<Tab>";
-	  		};
-	  		fromVscode = [
-	  		{
-	  			lazyLoad = true;
-	  			paths = "${pkgs.vimPlugins.friendly-snippets}";
-	  		}
-	  		];
-	  	};
-	  	cmp_luasnip = {
-	  		enable = true;
-	  	};
-	  	cmp-nvim-lsp = {
-	  		enable = true;
-	  	};
-	  	cmp = {
-	  		enable = true;
-	  		autoEnableSources = true;
-	  		settings = {
-	  			mapping = {
-	  				"<Tab>" = "cmp.mapping(cmp.mapping.select_next_item(), {'i', 's'})";
-	  				"<S-Tab>" = "cmp.mapping(cmp.mapping.select_prev_item(), {'i', 's'})";
-	  				"<CR>" = "cmp.mapping.confirm({ select = true })";
-	  			};
-	  			sources = [
-	  			  {name = "nvim_lsp";}
-	  			  {name = "luasnip";}
-	  			  {name = "path";}
-	  			  {name = "buffer";}
-	  			];
-          snippet.expand = ''function(args) require('luasnip').lsp_expand(args.body) end'';
-          expand = ''
-            function(args)
-              require('luasnip').lsp_expand(args.body)
-            end
-          '';
-	  		};
-	  	};
-
-	  };
-
-    plugins.lsp-lines = {
-      enable = true;
-    };
-
-    plugins.lsp = {
-      enable = true;
-      keymaps = {
-        silent = true;
-        diagnostic = {
-          # Navigate in diagnostics
-          "<leader>k" = "goto_prev";
-          "<leader>j" = "goto_next";
-        };
-
-        lspBuf = {
-          gd = "definition";
-          gD = "references";
-          gt = "type_definition";
-          gi = "implementation";
-          K = "hover";
-          "<F2>" = "rename";
-        };
-      };
-      servers = {
-	      tsserver.enable = true;
-	      eslint.enable = true;
-	      graphql.enable = true;
-	      html.enable = true;
-	      nixd.enable = true;
-        gopls.enable = true;
-        prismals.enable = true;
-        pyright.enable = true;
-        templ.enable = true;
-        typos-lsp.enable = true;
-      };
-    };
-
-    # plugins.lsp-format.enable = true;
-
-    plugins.none-ls = {
-      enable = true;
-      # enableLspFormat = true;
-      sources = {
-        diagnostics.stylelint.enable = true;
-      };
-    };
-  };
-
-  programs.zsh = {
-    enable = true;
-    syntaxHighlighting.enable = true;
-    oh-my-zsh = {
-      theme = "robbyrussell";
-      plugins = [ 
-        "git" 
-	      "node"
-	      "history"
-        "zsh-users/zsh-autosuggestions" 
-        { name = "romkatv/powerlevel10k"; tags = [ as:theme depth:1 ]; } 
-      ];
-    };
-    autosuggestion.enable = true;
-  };
-
-  programs.emacs = {
-    enable = true;
-    package = pkgs.emacs;  # replace with pkgs.emacs-gtk, or a version provided by the community overlay if desired.
-    extraConfig = ''
-      (setq standard-indent 2)
-    '';
-  };
-
-  programs.dircolors.enableZshIntegration = true;
-  programs.starship.enable = true;
-  programs.starship.enableZshIntegration = true;
-  programs.starship.settings = {
-    add_newline = false;
-    format = "$shlvl$shell$username$hostname$nix_shell$git_branch$git_commit$git_state$git_status$directory$jobs$cmd_duration$character";
-    shlvl = {
-      disabled = false;
-      symbol = "ﰬ";
-      style = "bright-red bold";
-    };
-    time = {
-      disabled = false;
-      time_format = "%R";
-      style = "bg:#33658A";
-      format = "[ ♥ $time ]($style)";
-    };
-    username = {
-      show_always = true;
-      style_user = "bright-white bold";
-      style_root = "bright-red bold";
-    };
-    hostname = {
-      style = "bright-green bold";
-      ssh_only = true;
-    };
-    nix_shell = {
-      symbol = "";
-      format = "[$symbol$name]($style) ";
-      style = "bright-purple bold";
-    };
-    git_branch = {
-      only_attached = true;
-      format = "[$symbol$branch]($style) ";
-      symbol = " ";
-      style = "bright-yellow bold";
-    };
-    git_commit = {
-      only_detached = true;
-      format = "[ﰖ$hash]($style) ";
-      style = "bright-yellow bold";
-    };
-    git_state = {
-      style = "bright-purple bold";
-    };
-    git_status = {
-      style = "bright-green bold";
-    };
-    directory = {
-      read_only = " ";
-      truncation_length = 0;
-    };
-    cmd_duration = {
-      format = "[$duration]($style) ";
-      style = "bright-blue";
-    };
-    jobs = {
-      style = "bright-green bold";
-    };
-    character = {
-      success_symbol = "[\\$](bright-green bold)";
-      error_symbol = "[\\$](bright-red bold)";
-    };
-  };
-
   programs.git = {
     enable = true;
   };
-
-  programs.helix = {
-    enable = true;
-    settings = {
-      theme = "autumn_night_transparent";
-      editor.cursor-shape = {
-        normal = "block";
-        insert = "bar";
-        select = "underline";
-      };
-    };
-    languages.language = [{
-      name = "nix";
-      auto-format = true;
-      formatter.command = "${pkgs.nixfmt}/bin/nixfmt";
-    }];
-    themes = {
-      autumn_night_transparent = {
-        "inherits" = "autumn_night";
-        "ui.background" = { };
-      };
-    };
-  };
-
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
