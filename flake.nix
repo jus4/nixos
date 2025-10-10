@@ -23,7 +23,21 @@
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
     in {
-    nixosConfigurations = {
+      devShells.${system}.suckless = pkgs.mkShell {
+        packages = with pkgs; [
+          pkg-config
+          xorg.libX11
+          xorg.libXft
+          xorg.libXinerama
+          fontconfig
+          freetype
+          harfbuzz
+          gcc
+          gnumake
+        ];
+      };
+
+      nixosConfigurations = {
       juice = lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs;};

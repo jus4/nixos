@@ -114,10 +114,10 @@ myScratchPads = [
     spawnEmacsScratch = "emacsclient --alternate-editor='' -nc --frame-parameters='(quote (name . \"emacs-scratch\"))'"
     manageEmacs = customFloating $ W.RationalRect l t w h
                where
-                 h = 0.7
-                 w = 0.7
-                 t = 0.7 -h
-                 l = 0.7 -w
+                w = 0.7
+                h = 0.7
+                l = (1 - w) / 2
+                t = 0.05  -- Push it down from the top to avoid xmoba
     spawnPav = "spotify"
     findPav = className=? "Spotify"
     managePav = customFloating $ W.RationalRect l t w h -- and I'd like it fixed using the geometry below
@@ -158,7 +158,7 @@ myManageHook =
 
 myStartupHook = do
   -- spawnOn "1:chat" "/var/lib/snapd/snap/bin/slack"
-  spawnOn "4:music" "qutebrowser"
+  -- spawnOn "4:music" "qutebrowser"
   spawn "polybar -q example -c ~/.config/polybar/config.ini"
   -- spawnOn "2:work" "/usr/bin/google-chrome-stable"
 

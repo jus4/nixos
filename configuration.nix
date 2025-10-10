@@ -19,7 +19,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "juice"; # Define your hostname.
-  networking.useNetworkd = true;
+  # networking.useNetworkd = true;
   environment.etc."ppp/options".text = "ipcp-accept-remote";
   
   networking.extraHosts =
@@ -34,6 +34,7 @@
     enable = true;
     # enableStrongSwan = true;
   };
+
 
   # Set your time zone.
   time.timeZone = "Europe/Helsinki";
@@ -126,6 +127,7 @@
   # List packages installed in system profile. To search, run:
   fonts.packages = with pkgs; [ nerdfonts ];
   environment.systemPackages = with pkgs; [
+    dwm
     zlib
     acpi
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
@@ -159,7 +161,6 @@
     firefox
     lutris
     brave
-    dmenu
     pciutils
     rofi
     wget
@@ -175,60 +176,6 @@
   networking.resolvconf.enable = false;
 
   services = {
-
-    # Open SSH
-    # openssh.enable = true;
-
-    # strongswan = {
-    #   enable = true;
-    #   secrets = [ "/etc/ipsec.d/ipsec.secrets" ];
-    #   setup = {
-    #     strictcrlpolicy = "yes";
-    #     uniqueids = "yes";
-    #   };
-    #
-    #   connections.crasman = {
-    #     # Connection Basics
-    #     auto = "add";  # Changed from "add" for automatic connection
-    #     type = "tunnel";
-    #     keyexchange = "ikev1";
-    #
-    #     left = "%any";
-    #     leftauth = "psk";
-    #     leftauth2 = "xauth";
-    #     leftsourceip = "%config";
-    #     leftid = "vpnuser@local";
-    #
-    #     # Remote (Server) Settings
-    #     right = "vpn1.crasman.fi";
-    #     rightid = "79.134.111.186";
-    #     rightsubnet = "0.0.0.0/0";
-    #     rightauth = "psk";
-    #
-    #     # XAuth Configuration
-    #     # xauth_identity =  "jussi.leskinen@crasman.fi";
-    #     # xauth_identity =  "jussi.leskinen@crasman.fi";
-    #     xauth_identity = /run/secrets/strongswan_xauth_identity;
-    #
-    #     # Security Parameters
-    #     ike = "aes256-sha256-modp1536";  # Changed from sha512 (more compatible)
-    #     esp = "aes256-sha256-modp1536";
-    #     rekey = "yes";
-    #     reauth = "yes";
-    #
-    #     # NAT/DPD Settings
-    #     forceencaps = "yes";  # Critical for NAT traversal
-    #     fragmentation = "yes";
-    #     dpdaction = "restart";
-    #     dpddelay = "10s";
-    #     dpdtimeout = "60s";
-    #
-    #     # Timeouts
-    #     ikelifetime = "14400s";
-    #     lifetime = "3600s";
-    #   };
-    #
-    # };
 
     printing = {
       drivers = [ pkgs.hplip ];
@@ -259,8 +206,21 @@
       enable = true;
       layout = "fi";
       imwheel.enable = true;
-      windowManager.xmonad.enable = true;
-      windowManager.xmonad.enableContribAndExtras = true;
+
+      windowManager = {
+        #xmonad
+        xmonad = {
+          enable = true;
+          enableContribAndExtras = true;
+        };
+        #dwm
+        dwm = {
+          enable = true;
+          # package = pkgs.dwm.overrideAttrs {
+          #     src = ./pkgs/dwm;
+          # };
+        };
+      };
       xkbVariant = "";
 
       videoDrivers = ["nvidia"];
