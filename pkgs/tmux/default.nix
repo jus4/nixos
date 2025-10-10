@@ -23,6 +23,7 @@
       unbind C-s
       set -g prefix C-s
       bind C-s send-prefix
+      bind l last-window
     '';
   };
 }

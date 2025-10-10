@@ -34,7 +34,10 @@
         };
       };
   
-  
+      plugins.copilot-vim = {
+        enable = true;
+      };
+
       plugins.barbar = {
         enable = true;
       };
