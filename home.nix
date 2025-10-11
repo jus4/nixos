@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, ... }:
 
 {
   imports = [
@@ -11,6 +11,7 @@
     ./pkgs/alacritty
     ./pkgs/emacs
     ./pkgs/zsh
+    ./modules/suckless.nix
   ];
 
   # Home Manager needs a bit of information about you and the paths it should
@@ -32,125 +33,128 @@
 
   # The home.packages option allows you to install Nix packages into your
   # environment.
-  home.packages = [
-    pkgs.zip
-    pkgs.unzip
-    pkgs.xclip
-    pkgs.lazygit
-    pkgs.mkcert
-    pkgs.tmux
-    pkgs.calc
+  home.packages = with pkgs; [
+    zip
+    unzip
+    xclip
+    lazygit
+    mkcert
+    tmux
+    calc
 
-    pkgs.xorg.xev
-    pkgs.input-remapper
-    pkgs.evtest
+    xorg.xev
+    input-remapper
+    evtest
 
-    pkgs.lm_sensors
+    lm_sensors
 
-    pkgs.nix-tree
+    nix-tree
 
-    pkgs.qutebrowser
-    # pkgs.ladybird
-    pkgs.google-chrome
-    pkgs.polybar
-    pkgs.trayer
+    qutebrowser
+    # ladybird
+    google-chrome
+    polybar
+    trayer
 
-    pkgs.pavucontrol # pulseaudio volume control
-    pkgs.paprefs # pulseaudio preferences
+    pavucontrol # pulseaudio volume control
+    paprefs # pulseaudio preferences
 
-    pkgs.xbindkeys
-    pkgs.xbindkeys-config
-    pkgs.xdotool
+    xbindkeys
+    xbindkeys-config
+    xdotool
 
 
-    pkgs.pulsemixer
+    pulsemixer
 
-    pkgs.appimage-run
+    appimage-run
 
     #browser
-    pkgs.links2
-    pkgs.lynx
+    links2
+    lynx
 
     #Free with no ads
-    pkgs.freetube
+    freetube
 
     #share files to phone
-    pkgs.localsend
+    localsend
 
     # Time tracking
-    pkgs.timewarrior
+    timewarrior
 
     # pkgs.teams
 
     # Gaming
-    pkgs.lutris
-    pkgs.heroic
-    pkgs.steam
+    lutris
+    heroic
+    steam
 
     #postman
-    pkgs.postman
+    postman
 
     #office 
-    pkgs.libreoffice
+    libreoffice
 
     #file browsing
-    pkgs.xfce.thunar
+    xfce.thunar
 
     # Grep for search
-    pkgs.ripgrep
+    ripgrep
 
     # xmonad
-    pkgs.dialog # Dialog boxes on the terminal (to show key bindings)
-    pkgs.networkmanager_dmenu # networkmanager on dmenu
-    pkgs.networkmanagerapplet # networkmanager applet
-    pkgs.nitrogen # wallpaper manager
-    pkgs.xcape # keymaps modifier
-    pkgs.xorg.xkbcomp # keymaps modifier
-    pkgs.xorg.xmodmap # keymaps modifier
-    pkgs.xorg.xrandr # display manager (X Resize and Rotate protocol)
+    dialog # Dialog boxes on the terminal (to show key bindings)
+    networkmanager_dmenu # networkmanager on dmenu
+    networkmanagerapplet # networkmanager applet
+    nitrogen # wallpaper manager
+    xcape # keymaps modifier
+    xorg.xkbcomp # keymaps modifier
+    xorg.xmodmap # keymaps modifier
+    xorg.xrandr # display manager (X Resize and Rotate protocol)
 
     # network
-    pkgs.networkmanagerapplet
-    pkgs.whois
-    pkgs.dig
+    networkmanagerapplet
+    whois
+    dig
 
     # dropbox
-    pkgs.maestral
+    maestral
 
     # Notifications send
-    pkgs.libnotify
+    libnotify
 
     # Communication
-    pkgs.discord
-    pkgs.whatsapp-for-linux
+    discord
+    whatsapp-for-linux
 
     #music
-    pkgs.spotify
+    spotify
 
     #screenshot
-    pkgs.flameshot
+    flameshot
 
     #pdf
-    pkgs.kdePackages.okular
+    kdePackages.okular
 
     # camera
-    pkgs.gphoto2fs
-    pkgs.gphoto2
+    gphoto2fs
+    gphoto2
 
     #video
-    pkgs.mpv
-    pkgs.vlc
-    pkgs.shotcut
+    mpv
+    vlc
+    shotcut
 
     #torrent
-    pkgs.deluged
+    deluged
+
+    #ebooks
+    calibre
 
     # Golang extra
     # pkgs.air
     # pkgs.templ
 
     # Tailwindcss cli 
-    pkgs.tailwindcss
+    tailwindcss
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
@@ -164,13 +168,16 @@
     # (pkgs.writeShellScriptBin "my-hello" ''
     #   echo "Hello, ${config.home.username}!"
     # '')
-    pkgs.nerdfonts
-    pkgs.font-awesome
-    pkgs.material-design-icons
+    nerd-fonts.jetbrains-mono
+    font-awesome
+    material-design-icons
 
     # spell checking
-    pkgs.aspell
-    pkgs.aspellDicts.en
+    aspell
+    aspellDicts.en
+    aspellDicts.en-computers
+    aspellDicts.en-science
+
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
@@ -214,6 +221,7 @@
   #  /etc/profiles/per-user/juice/etc/profile.d/hm-session-vars.sh
   #
   home.sessionVariables = {
+    # ASPELL_CONF = "dict-dir /home/juice/.nix-profile/lib/aspell";
   };
 
   programs = {

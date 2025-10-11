@@ -49,10 +49,10 @@
   	  plugins = {
   	  	luasnip = {
   	  		enable = true;
-  	  		extraConfig = {
-  	  			enable_autosnippets = true;
-  	  			store_selection_keys = "<Tab>";
-  	  		};
+  	  		# extraConfig = {
+  	  		# 	enable_autosnippets = true;
+  	  		# 	store_selection_keys = "<Tab>";
+  	  		# };
   	  		fromVscode = [
   	  		{
   	  			lazyLoad = true;
@@ -116,21 +116,21 @@
           };
         };
         servers = {
-  	      tsserver.enable = true;
+  	      ts_ls.enable = true;
   	      eslint.enable = true;
-  	      graphql.enable = true;
+  	      # graphql.enable = true;
   	      html.enable = true;
   	      nixd.enable = true;
           gopls.enable = true;
-          prismals.enable = true;
+          # prismals.enable = true;
           pyright.enable = true;
           templ.enable = true;
-          typos-lsp.enable = true;
+          typos_lsp.enable = true;
         };
       };
   
       # plugins.lsp-format.enable = true;
-  
+      plugins.web-devicons.enable = true;
       plugins.none-ls = {
         enable = true;
         # enableLspFormat = true;

@@ -45,7 +45,7 @@
   hardware.enableAllFirmware = true;
   hardware.opengl = {
     enable = true;
-    driSupport = true;
+    # driSupport = true;
     driSupport32Bit = true;
   };
 
@@ -71,7 +71,7 @@
     #media-session.enable = true;
   };
 
-  sound.enable = true;
+  # sound.enable = true;
   nixpkgs.config.pulseaudio = true;
 
   # Configure console keymap
@@ -98,7 +98,7 @@
   ];
 
   # Latest kernel
-  boot.kernelPackages = pkgs.linuxPackages_6_12;
+  # boot.kernelPackages = pkgs.linuxPackages_6_12;
 
   programs = {
     zsh = {
@@ -125,13 +125,26 @@
   nixpkgs.config.allowUnfree = true;
 
   # List packages installed in system profile. To search, run:
-  fonts.packages = with pkgs; [ nerdfonts ];
+  # fonts.packages = with pkgs; [ nerdfonts ];
+  fonts.packages = with pkgs; [
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.fira-code
+    nerd-fonts.droid-sans-mono
+    nerd-fonts._3270
+    nerd-fonts.symbols-only 
+  ];
   environment.systemPackages = with pkgs; [
     dwm
     zlib
     acpi
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-    nerdfonts
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.fira-code
+    nerd-fonts.droid-sans-mono
+    nerd-fonts._3270
+    nerd-fonts.symbols-only 
+    # nerdfonts.jetbrains-mono
+    # nerd-fonts._3270
     pciutils
     glxinfo
     dunst

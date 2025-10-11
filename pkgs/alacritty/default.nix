@@ -21,10 +21,14 @@
   
       font = {
         size = 12;
+        # normal = {
+        #   family = "JetBrainsMono Nerd Font Propo";
+        #   style = "Regular";
+        # };
       };
       env.TERM = "xterm-256color";
   
-      shell = {
+      terminal.shell = {
         program = "/run/current-system/sw/bin/zsh";
       };
   
