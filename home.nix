@@ -44,6 +44,7 @@
     mkcert
     tmux
     calc
+    feh
 
     xorg.xev
     input-remapper
@@ -180,6 +181,12 @@
     aspellDicts.en
     aspellDicts.en-computers
     aspellDicts.en-science
+
+
+    #DWM blocks
+    (pkgs.dwmblocks.overrideAttrs (old: {
+      src = ./pkgs/dwmblocks;
+    }))
 
   ];
 

@@ -144,8 +144,6 @@
     nerd-fonts.droid-sans-mono
     nerd-fonts._3270
     nerd-fonts.symbols-only 
-    # nerdfonts.jetbrains-mono
-    # nerd-fonts._3270
     pciutils
     glxinfo
     dunst
@@ -184,6 +182,7 @@
     strongswan
     sops
     age
+
   ];
 
   # NixLd 
