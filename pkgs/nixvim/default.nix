@@ -14,6 +14,14 @@
       plugins.treesitter = {
         enable = true;
       };
+
+      diagnostic.settings = {
+        virtual_lines = {
+          current_line = true;
+        };
+        virtual_text = true;
+      };
+
   
       clipboard.register = "unnamedplus";
   
@@ -43,6 +51,10 @@
       };
   
       plugins.comment = {
+        enable = true;
+      };
+
+      plugins.trouble = {
         enable = true;
       };
   
@@ -98,6 +110,7 @@
   
       plugins.lsp = {
         enable = true;
+        inlayHints = true;
         keymaps = {
           silent = true;
           diagnostic = {
@@ -129,11 +142,11 @@
         };
       };
   
-      # plugins.lsp-format.enable = true;
+      plugins.lsp-format.enable = true;
       plugins.web-devicons.enable = true;
       plugins.none-ls = {
         enable = true;
-        # enableLspFormat = true;
+        enableLspFormat = true;
         sources = {
           diagnostics.stylelint.enable = true;
         };

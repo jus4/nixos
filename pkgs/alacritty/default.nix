@@ -7,7 +7,7 @@
     settings = {
       window = {
         title = "Terminal";
-        opacity = 0.65;
+        opacity = 0.85;
   
         position = {
           x = 900;

@@ -99,6 +99,8 @@
 
   # Latest kernel
   # boot.kernelPackages = pkgs.linuxPackages_6_12;
+  # boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.extraModulePackages = [ config.hardware.nvidia.package ];
 
   programs = {
     zsh = {
@@ -118,7 +120,7 @@
   programs.xss-lock.enable = true;
   programs.xss-lock.lockerCommand = "/run/wrappers/bin/slock";
 
-  boot.kernelParams = [ "button.lid_init_state=open" ];
+  boot.kernelParams = [ "button.lid_init_state=open" "nvidia.env.preserve_video_memory_allocations=1" ];
 
 
   # Allow unfree packages
@@ -134,7 +136,6 @@
     nerd-fonts.symbols-only 
   ];
   environment.systemPackages = with pkgs; [
-    dwm
     zlib
     acpi
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
@@ -167,6 +168,8 @@
     openconnect
     openssl
     nodejs
+    pnpm
+    bun
     ruby
     neofetch
     alacritty
@@ -214,24 +217,41 @@
       packages = [ pkgs.dconf ];
     };
 
+    displayManager.ly.enable = true;
     # Configure keymap in X11
+    picom = {
+      enable = true;
+    };
+
     xserver = {
       enable = true;
       layout = "fi";
       imwheel.enable = true;
+      autoRepeatDelay = 200;
+      autoRepeatInterval = 35;
+      displayManager.sessionCommands = ''
+        xwallpaper --zoom ~/.dotfiles/walls/clouds_above_a_mountain.png
+      '';
+      # displayManager.lightdm.enable = true;
 
       windowManager = {
         #xmonad
         xmonad = {
           enable = true;
           enableContribAndExtras = true;
+          config = builtins.readFile ./wm/xmonad/xmonad.hs;
+          extraPackages = hp: [
+            hp.dbus
+            hp.monad-logger
+          ];
         };
+
         #dwm
         dwm = {
           enable = true;
-          # package = pkgs.dwm.overrideAttrs {
-          #     src = ./pkgs/dwm;
-          # };
+          package = pkgs.dwm.overrideAttrs {
+              src = ./pkgs/dwm;
+          };
         };
       };
       xkbVariant = "";
@@ -302,6 +322,7 @@
     # Fine-grained power management. Turns off GPU when not in use.
     # Experimental and only works on modern Nvidia GPUs (Turing or newer).
     powerManagement.finegrained = false;
+    powerManagement.enable = true;
 
     # Use the NVidia open source kernel module (not to be confused with the
     # independent third-party "nouveau" open source driver).

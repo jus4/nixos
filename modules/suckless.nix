@@ -6,5 +6,6 @@
       src = ../pkgs/dmenu;
       patches = [];
     }))
+    st
   ];
 }

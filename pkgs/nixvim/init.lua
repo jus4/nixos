@@ -16,6 +16,12 @@ vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
 vim.keymap.set("t","<Esc>", "<C-\\><C-n>")
 
 vim.filetype.add({ extension = { templ = "templ" } })
+
+vim.cmd([[
+  let g:copilot_no_tab_map = v:true
+  imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")
+]])
+
 -- lspconfig.templ.setup({
 --   filetypes = { "templ" },
 -- })

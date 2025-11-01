@@ -2,7 +2,7 @@
 
 {
   imports = [
-    ./wm/xmonad
+    # ./wm/xmonad
     ./wm/polybar
     ./services/dunst
     ./pkgs/tmux
@@ -31,9 +31,12 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
+  xdg.configFile."picom/picom.conf".source = ./pkgs/picom/picom.conf;
+
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = with pkgs; [
+    xwallpaper
     zip
     unzip
     xclip
