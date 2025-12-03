@@ -107,6 +107,10 @@
       plugins.lsp-lines = {
         enable = true;
       };
+
+      plugins.copilot-chat = {
+        enable = true;
+      };
   
       plugins.lsp = {
         enable = true;
@@ -126,6 +130,7 @@
             gi = "implementation";
             K = "hover";
             "<F2>" = "rename";
+            "<C-k>" = "signature_help";
           };
         };
         servers = {

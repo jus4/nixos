@@ -36,6 +36,9 @@
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = with pkgs; [
+    # Development tools
+    ollama
+
     xwallpaper
     zip
     unzip
@@ -188,6 +191,39 @@
       src = ./pkgs/dwmblocks;
     }))
 
+    # Custom scripts
+    (pkgs.writeShellScriptBin "cpu_usage" ''
+      #!/bin/sh
+      usage=$(top -bn1 | grep "Cpu(s)" | awk '{print 100 - $8"%"}')
+      echo "$usage"
+    '')
+
+    (pkgs.writeShellScriptBin "net_status" ''
+      #!/bin/sh
+      if command -v nmcli >/dev/null 2>&1; then
+        ssid=$(nmcli -t -f ACTIVE,SSID dev wifi | grep '^yes' | cut -d: -f2)
+        ip=$(ip -4 addr show wlp0s20f3 | awk '/inet / {print $2}' | cut -d/ -f1)
+        # If not on wifi, check ethernet
+        if [ -z "$ssid" ]; then
+          ssid="LAN"
+          ip=$(ip -4 addr show eth0 | awk '/inet / {print $2}' | cut -d/ -f1)
+        fi
+        if [ -n "$ip" ]; then
+          echo "󰤨 $ssid $ip"
+        else
+          echo "󰤭 Disconnected"
+        fi
+      else
+        # Fallback if nmcli isn't available
+        iface=$(ip route | awk '/default/ {print $5; exit}')
+        ip=$(ip -4 addr show "$iface" | awk '/inet / {print $2}' | cut -d/ -f1)
+        if [ -n "$iface" ] && [ -n "$ip" ]; then
+          echo "󰈁 $iface $ip"
+        else
+          echo "󰤭 Disconnected"
+        fi
+      fi
+    '')
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage

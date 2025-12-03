@@ -251,6 +251,9 @@
           package = pkgs.dwm.overrideAttrs {
               src = ./pkgs/dwm;
           };
+          extraSessionCommands = ''
+            dwmblocks &
+          '';
         };
       };
       xkbVariant = "";
