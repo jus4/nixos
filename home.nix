@@ -37,7 +37,7 @@
   # environment.
   home.packages = with pkgs; [
     # Development tools
-    ollama
+    # ollama
 
     xwallpaper
     zip
@@ -48,6 +48,12 @@
     tmux
     calc
     feh
+
+    #Database
+    mysql84
+    # zlib
+    zstd   # ← required for mysql2 to link
+    figma-linux
 
     xorg.xev
     input-remapper
@@ -90,9 +96,13 @@
 
     # pkgs.teams
 
+    gphoto2
+    libgphoto2
+
     # Gaming
     lutris
     heroic
+    wine
     steam
 
     #postman
@@ -160,9 +170,11 @@
     # pkgs.air
     # pkgs.templ
 
+    opencode  
+
     # Tailwindcss cli 
     tailwindcss
-
+    figma-linux
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
     # # parentheses. Maybe you want to install Nerd Fonts with a limited number of

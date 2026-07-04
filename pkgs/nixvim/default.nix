@@ -46,6 +46,11 @@
         enable = true;
       };
 
+      plugins.rest = {
+        enable = true;
+        enableTelescope = true;
+      };
+
       plugins.barbar = {
         enable = true;
       };
@@ -110,6 +115,19 @@
 
       plugins.copilot-chat = {
         enable = true;
+        settings = {
+          model = "claude-sonnet-4.5";
+          # keymaps = {
+          #   chat = {
+          #     "<leader>cc" = "open";
+          #     "<leader>cr" = "reply";
+          #     "<leader>ca" = "action_menu";
+          #     "<leader>ce" = "edit_with_instruction";
+          #     "<leader>cd" = "select_and_send";
+          #   };
+          # };
+        };
+
       };
   
       plugins.lsp = {
@@ -144,7 +162,15 @@
           pyright.enable = true;
           templ.enable = true;
           typos_lsp.enable = true;
-        };
+          # ruby_lsp.enable = true;
+          ruby_lsp = {
+            enable = true;
+            settings = {
+              bundlerPath = "";   # disable auto-install
+              rubyLsPath = "ruby-lsp"; # let Nix provide ruby-lsp
+            };
+          };
+      };
       };
   
       plugins.lsp-format.enable = true;

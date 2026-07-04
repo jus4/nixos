@@ -7,7 +7,6 @@
 {
   imports = [ # Include the results of the hardware scan.
     ./hardware-configuration.nix
-    ./strongswan/strongswan.nix
     ];
 
 
@@ -21,6 +20,39 @@
   networking.hostName = "juice"; # Define your hostname.
   # networking.useNetworkd = true;
   environment.etc."ppp/options".text = "ipcp-accept-remote";
+
+  # environment.etc."systemd/system-sleep/display-reset".text = ''
+  #   #!/bin/sh
+  # 
+  #   case $1 in
+  #     post)
+  #       sleep 3
+  # 
+  #       export DISPLAY=:0
+  #       export XAUTHORITY=/home/juice/.Xauthority
+  #
+  #       su juice -c '
+  #         OUTPUT=$(xrandr | awk "/ connected/ && /DisplayPort/ {print \$1; exit}")
+  #
+  #         if [ -n "$OUTPUT" ]; then
+  #           xrandr --output "$OUTPUT" --off
+  #           sleep 1
+  #           xrandr --output "$OUTPUT" --auto
+  #         fi
+  #       '
+  #       ;;
+  #
+  # 
+  #       su juice -c "xrandr --output DisplayPort-3 --off"
+  #       sleep 1
+  #       su juice -c "xrandr --output DisplayPort-3 --auto"
+  #       ;;
+  #   esac
+  # '';
+  # 
+  # system.activationScripts.display-reset = ''
+  #   chmod +x /etc/systemd/system-sleep/display-reset
+  # '';
   
   networking.extraHosts =
   ''
@@ -47,6 +79,18 @@
     enable = true;
     # driSupport = true;
     driSupport32Bit = true;
+  };
+
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+    extraPackages = with pkgs; [
+      amdvlk       # AMD's Vulkan driver
+      # optionally, packages for VA-API / VDPAU etc if you need video decode/encode
+    ];
+    extraPackages32 = with pkgs; [
+      driversi686Linux.amdvlk
+    ];
   };
 
   i18n.extraLocaleSettings = {
@@ -81,7 +125,7 @@
   users.users.juice = {
     isNormalUser = true;
     description = "Juice";
-    extraGroups = [ "networkmanager" "wheel" "video" "storage" "camera" "docker"];
+    extraGroups = [ "networkmanager" "wheel" "video" "storage" "camera" "docker" "adbusers" "plugdev"];
     packages = with pkgs; [ ];
   };
 
@@ -91,7 +135,7 @@
   boot.extraModprobeConfig = ''
       options hid_apple fnmode=2
   '';
-  boot.kernelModules = [ "hid-apple"  ];
+  boot.kernelModules = [ "hid-apple" "amdgpu" ];
   systemd.services.bluetooth.serviceConfig.ExecStart = [
     ""
     "${pkgs.bluez}/libexec/bluetooth/bluetoothd --noplugin=sap,avrcp"
@@ -100,13 +144,24 @@
   # Latest kernel
   # boot.kernelPackages = pkgs.linuxPackages_6_12;
   # boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.extraModulePackages = [ config.hardware.nvidia.package ];
+  # boot.extraModulePackages = [ config.hardware.nvidia.package ];
 
   programs = {
     zsh = {
       enable = true;
     };
   };
+
+
+  programs.thunar = {
+    enable = true;
+    plugins = with pkgs.xfce; [
+      thunar-volman # Handles automatic mounting of camera backends
+    ];
+  };
+
+  # 3. Register the gphoto2 program and its hardware udev hardware rules 
+  programs.gphoto2.enable = true;
 
   virtualisation.virtualbox.host.enable = true;
   virtualisation.docker.enable = true;
@@ -120,7 +175,7 @@
   programs.xss-lock.enable = true;
   programs.xss-lock.lockerCommand = "/run/wrappers/bin/slock";
 
-  boot.kernelParams = [ "button.lid_init_state=open" "nvidia.env.preserve_video_memory_allocations=1" ];
+  # boot.kernelParams = [ "button.lid_init_state=open" "nvidia.env.preserve_video_memory_allocations=1" ];
 
 
   # Allow unfree packages
@@ -183,6 +238,9 @@
     sops
     age
 
+    #db 
+    mariadb
+
   ];
 
   # NixLd 
@@ -191,6 +249,15 @@
   networking.resolvconf.enable = false;
 
   services = {
+    ollama = {
+      enable = true;
+
+      # Choose the package matching your GPU:
+      # package = pkgs.ollama-cuda;    # NVIDIA
+      package = pkgs.ollama-rocm;    # AMD
+      # package = pkgs.ollama-vulkan;  # Vulkan
+      # default is CPU
+    };
 
     printing = {
       drivers = [ pkgs.hplip ];
@@ -258,7 +325,7 @@
       };
       xkbVariant = "";
 
-      videoDrivers = ["nvidia"];
+      videoDrivers = ["amdgpu"];
 
       libinput = {
         enable = true;
@@ -300,12 +367,12 @@
   # TODO fix not working yeat
   systemd.services = {
     upower.enable = true;
-    suspend-on-low-battery = {
-      description = "Suspend on low battery";
-      serviceConfig = {
-        ExecStart = "./suspend_on_low.sh";
-      };
-    };
+  #  suspend-on-low-battery = {
+  #    description = "Suspend on low battery";
+  #    serviceConfig = {
+  #      ExecStart = "./suspend_on_low.sh";
+  #    };
+  #  };
   };
 
   systemd.timers.suspend-on-low-battery = {
@@ -316,45 +383,53 @@
     };
   };
 
-  hardware.nvidia = {
-    modesetting.enable = true;
+  # This is the one that correctly adds the udev rules!
+  programs.adb.enable = true;
 
-    # Nvidia power management. Experimental, and can cause sleep/suspend to fail.
-    # powerManagement.enable = false; // did cause sleep/suspend to fail ?
-    # Fine-grained power management. Turns off GPU when not in use.
-    # Experimental and only works on modern Nvidia GPUs (Turing or newer).
-    powerManagement.finegrained = false;
-    powerManagement.enable = true;
+  # Not sure if this is necessary if the above is set?
+  services.udev.packages = [
+    pkgs.android-udev-rules
+  ];
 
-    # Use the NVidia open source kernel module (not to be confused with the
-    # independent third-party "nouveau" open source driver).
-    # Support is limited to the Turing and later architectures. Full list of 
-    # supported GPUs is at: 
-    # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus 
-    # Only available from driver 515.43.04+
-    # Currently alpha-quality/buggy, so false is currently the recommended setting.
-    open = false;
-
-    # Enable the Nvidia settings menu,
-	  # accessible via `nvidia-settings`.
-    nvidiaSettings = true;
-
-    # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    # package = pkgs.nvidiaPackages.stable; 
-    # package = config.boot.kernelPackages.nvidiaPackages.stable;
-
-    package = config.boot.kernelPackages.nvidiaPackages.beta;
-
-    prime = { 
-      offload.enable = true;
-		# Make sure to use the correct Bus ID values for your system!
-    	intelBusId = "PCI:00:02:0";
-		  nvidiaBusId = "PCI:03:00:0";
-
-		#  intelBusId = "PCI:00:02.0";
-		#  nvidiaBusId = "PCI:01:00.0";
-	  };
-  };
+  # hardware.nvidia = {
+  #   modesetting.enable = true;
+  #
+  #   # Nvidia power management. Experimental, and can cause sleep/suspend to fail.
+  #   # powerManagement.enable = false; // did cause sleep/suspend to fail ?
+  #   # Fine-grained power management. Turns off GPU when not in use.
+  #   # Experimental and only works on modern Nvidia GPUs (Turing or newer).
+  #   powerManagement.finegrained = false;
+  #   powerManagement.enable = true;
+  #
+  #   # Use the NVidia open source kernel module (not to be confused with the
+  #   # independent third-party "nouveau" open source driver).
+  #   # Support is limited to the Turing and later architectures. Full list of 
+  #   # supported GPUs is at: 
+  #   # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus 
+  #   # Only available from driver 515.43.04+
+  #   # Currently alpha-quality/buggy, so false is currently the recommended setting.
+  #   open = false;
+  #
+  #   # Enable the Nvidia settings menu,
+	 #  # accessible via `nvidia-settings`.
+  #   nvidiaSettings = true;
+  #
+  #   # Optionally, you may need to select the appropriate driver version for your specific GPU.
+  #   # package = pkgs.nvidiaPackages.stable; 
+  #   # package = config.boot.kernelPackages.nvidiaPackages.stable;
+  #
+  #   package = config.boot.kernelPackages.nvidiaPackages.beta;
+  #
+  #   prime = { 
+  #     offload.enable = true;
+		# # Make sure to use the correct Bus ID values for your system!
+  #   	intelBusId = "PCI:00:02:0";
+		#   nvidiaBusId = "PCI:03:00:0";
+  #
+		# #  intelBusId = "PCI:00:02.0";
+		# #  nvidiaBusId = "PCI:01:00.0";
+	 #  };
+  # };
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
