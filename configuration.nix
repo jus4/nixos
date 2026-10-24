@@ -21,39 +21,19 @@
   # networking.useNetworkd = true;
   environment.etc."ppp/options".text = "ipcp-accept-remote";
 
-  # environment.etc."systemd/system-sleep/display-reset".text = ''
-  #   #!/bin/sh
-  # 
-  #   case $1 in
-  #     post)
-  #       sleep 3
-  # 
-  #       export DISPLAY=:0
-  #       export XAUTHORITY=/home/juice/.Xauthority
-  #
-  #       su juice -c '
-  #         OUTPUT=$(xrandr | awk "/ connected/ && /DisplayPort/ {print \$1; exit}")
-  #
-  #         if [ -n "$OUTPUT" ]; then
-  #           xrandr --output "$OUTPUT" --off
-  #           sleep 1
-  #           xrandr --output "$OUTPUT" --auto
-  #         fi
-  #       '
-  #       ;;
-  #
-  # 
-  #       su juice -c "xrandr --output DisplayPort-3 --off"
-  #       sleep 1
-  #       su juice -c "xrandr --output DisplayPort-3 --auto"
-  #       ;;
-  #   esac
-  # '';
-  # 
-  # system.activationScripts.display-reset = ''
-  #   chmod +x /etc/systemd/system-sleep/display-reset
-  # '';
-  
+  # Hibernation
+  swapDevices = [
+    {
+      device = "/var/lib/swapfile";
+      size = 32 * 1024; # 32GB in MB
+    }
+  ];
+
+  boot.kernelParams = ["resume_offset=201213952" "usbcore.autosuspend=-1" "amdgpu.noretry=0" "amdgpu.runpm=0" "amdgpu.sg_display=0"];
+  boot.resumeDevice = "/dev/disk/by-uuid/135cda41-5466-4565-b28e-57eeb4b857cd";
+  powerManagement.enable = true;
+  powerManagement.cpuFreqGovernor = "schedutil";
+
   networking.extraHosts =
   ''
     127.0.0.1 vcap.me
@@ -84,13 +64,13 @@
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
-    extraPackages = with pkgs; [
-      amdvlk       # AMD's Vulkan driver
-      # optionally, packages for VA-API / VDPAU etc if you need video decode/encode
-    ];
-    extraPackages32 = with pkgs; [
-      driversi686Linux.amdvlk
-    ];
+    # extraPackages = with pkgs; [
+    #   amdvlk       # AMD's Vulkan driver
+    #   # optionally, packages for VA-API / VDPAU etc if you need video decode/encode
+    # ];
+    # extraPackages32 = with pkgs; [
+    #   driversi686Linux.amdvlk
+    # ];
   };
 
   i18n.extraLocaleSettings = {
@@ -168,7 +148,7 @@
   users.extraGroups.vboxusers.members = [ "juice" ];
 
   #light
-  programs.light.enable = true;
+  # programs.light.enable = true;
 
   #slock
   programs.slock.enable = true;
@@ -191,6 +171,7 @@
     nerd-fonts.symbols-only 
   ];
   environment.systemPackages = with pkgs; [
+    usbutils
     zlib
     acpi
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
@@ -200,11 +181,12 @@
     nerd-fonts._3270
     nerd-fonts.symbols-only 
     pciutils
-    glxinfo
+    brightnessctl
+    # glxinfo
     dunst
     picom
     pcre.dev
-    node2nix
+    # node2nix
     zsh
     helix
     typescript
@@ -224,11 +206,12 @@
     pnpm
     bun
     ruby
-    neofetch
+    # neofetch
     alacritty
     alacritty-theme
     firefox
     lutris
+    vulkan-tools
     brave
     pciutils
     rofi
@@ -249,6 +232,22 @@
   networking.resolvconf.enable = false;
 
   services = {
+    tlp = {
+      enable = true;
+      settings = {
+        # Fixes the USB-C/DisplayPort disconnects on wake
+        USB_AUTOSUSPEND = 0; 
+        
+        # ThinkPad-specific battery health constraints (Prevents degradation)
+        START_CHARGE_THRESH_BAT0 = 75;
+        STOP_CHARGE_THRESH_BAT0 = 80;
+        
+        # Balanced scaling limits for Zen 2 on AC vs Battery
+        CPU_SCALING_GOVERNOR_ON_AC = "schedutil";
+        CPU_SCALING_GOVERNOR_ON_BAT = "schedutil";
+      };
+    };
+
     ollama = {
       enable = true;
 
@@ -267,12 +266,14 @@
     gnome.gnome-keyring.enable = true;
     upower = { 
       enable = true;
-      criticalPowerAction = "Hibernate";
+      criticalPowerAction = "HybridSleep";
       usePercentageForPolicy = true;
-      percentageAction = 80;
-      percentageLow = 80;
-      percentageCritical = 77;
+      percentageLow = 15;
+      percentageCritical = 10; 
+      percentageAction = 8;       
     };
+
+    # power-profiles-daemon.enable = true;
 
     resolved = {
       enable = true;
@@ -319,7 +320,7 @@
               src = ./pkgs/dwm;
           };
           extraSessionCommands = ''
-            dwmblocks &
+            setsid dwmblocks >/dev/null 2>&1 &
           '';
         };
       };
@@ -384,12 +385,12 @@
   };
 
   # This is the one that correctly adds the udev rules!
-  programs.adb.enable = true;
+  # programs.adb.enable = true;
 
   # Not sure if this is necessary if the above is set?
-  services.udev.packages = [
-    pkgs.android-udev-rules
-  ];
+  # services.udev.packages = [
+  #   pkgs.android-udev-rules
+  # ];
 
   # hardware.nvidia = {
   #   modesetting.enable = true;

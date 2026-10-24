@@ -10,6 +10,7 @@
     ./pkgs/starship
     ./pkgs/alacritty
     ./pkgs/emacs
+    ./pkgs/newsboat
     ./pkgs/zsh
     ./modules/suckless.nix
   ];
@@ -61,6 +62,8 @@
 
     lm_sensors
 
+    gh
+
     nix-tree
 
     qutebrowser
@@ -72,10 +75,13 @@
     pavucontrol # pulseaudio volume control
     paprefs # pulseaudio preferences
 
-    xbindkeys
-    xbindkeys-config
+    # xbindkeys
+    # xbindkeys-config
     xdotool
 
+    roslyn-ls
+    roslyn
+    dotnet-sdk
 
     pulsemixer
 
@@ -140,7 +146,7 @@
 
     # Communication
     discord
-    whatsapp-for-linux
+    # whatsapp-for-linux
 
     #music
     spotify
@@ -166,10 +172,7 @@
     #ebooks
     calibre
 
-    # Golang extra
-    # pkgs.air
-    # pkgs.templ
-
+    #LLM
     opencode  
 
     # Tailwindcss cli 
@@ -206,35 +209,46 @@
     # Custom scripts
     (pkgs.writeShellScriptBin "cpu_usage" ''
       #!/bin/sh
-      usage=$(top -bn1 | grep "Cpu(s)" | awk '{print 100 - $8"%"}')
+      usage=$(top -bn1 2>/dev/null | grep "Cpu(s)" | awk '{print 100 - $8"%"}')
       echo "$usage"
     '')
 
     (pkgs.writeShellScriptBin "net_status" ''
       #!/bin/sh
-      if command -v nmcli >/dev/null 2>&1; then
-        ssid=$(nmcli -t -f ACTIVE,SSID dev wifi | grep '^yes' | cut -d: -f2)
-        ip=$(ip -4 addr show wlp0s20f3 | awk '/inet / {print $2}' | cut -d/ -f1)
-        # If not on wifi, check ethernet
-        if [ -z "$ssid" ]; then
-          ssid="LAN"
-          ip=$(ip -4 addr show eth0 | awk '/inet / {print $2}' | cut -d/ -f1)
-        fi
-        if [ -n "$ip" ]; then
-          echo "󰤨 $ssid $ip"
-        else
-          echo "󰤭 Disconnected"
-        fi
-      else
-        # Fallback if nmcli isn't available
-        iface=$(ip route | awk '/default/ {print $5; exit}')
-        ip=$(ip -4 addr show "$iface" | awk '/inet / {print $2}' | cut -d/ -f1)
-        if [ -n "$iface" ] && [ -n "$ip" ]; then
-          echo "󰈁 $iface $ip"
-        else
-          echo "󰤭 Disconnected"
-        fi
+      line=$(nmcli -t -f TYPE,NAME,DEVICE connection show --active 2>/dev/null \
+        | grep -E '^(802-11-wireless|802-3-ethernet):' | head -n1)
+      if [ -z "$line" ]; then
+        echo "󰤭 Disconnected"
+        exit 0
       fi
+      type=''${line%%:*}
+      rest=''${line#*:}
+      name=''${rest%%:*}
+      dev=''${rest#*:}
+      ip=$(nmcli -t -f IP4.ADDRESS dev show "$dev" 2>/dev/null \
+        | head -n1 | sed 's|.*:||; s|/.*||')
+      if [ -z "$ip" ]; then
+        echo "󰤭 Disconnected"
+        exit 0
+      fi
+      if [ "$type" = "802-11-wireless" ]; then
+        echo "󰤨 $name $ip"
+      else
+        echo "󰈀 $dev $ip"
+      fi
+    '')
+
+    (pkgs.writeShellScriptBin "battery" ''
+      #!/bin/sh
+      cap=$(cat /sys/class/power_supply/BAT0/capacity 2>/dev/null)
+      status=$(cat /sys/class/power_supply/BAT0/status 2>/dev/null)
+      case "$status" in
+        Charging)    icon="" ;;
+        Discharging) icon="" ;;
+        Full)        icon="" ;;
+        *)           icon="" ;;
+      esac
+      echo "$icon $cap%"
     '')
   ];
 

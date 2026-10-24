@@ -3,7 +3,8 @@ static const Block blocks[] = {
 	/*Icon*/	/*Command*/		/*Update Interval*/	/*Update Signal*/
  {" ", "cpu_usage", 5, 0},
  {"", "net_status", 5, 0},
- {"Mem:", "free -h | awk '/^Mem/ { print $3\"/\"$2 }' | sed s/i//g",	30,		0},
+ {"Mem:", "free -h 2>/dev/null | awk '/^Mem/ { print $3\"/\"$2 }' | sed s/i//g",	30,		0},
+ {"", "battery", 30, 0},
  {"", "date '+%Y-%m-%d %H:%M'",					5,		0},
 };
 

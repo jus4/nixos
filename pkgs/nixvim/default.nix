@@ -13,7 +13,17 @@
       extraConfigLua = lib.fileContents ./init.lua;
       plugins.treesitter = {
         enable = true;
+        settings = {
+          ensure_installed = [
+            "go"
+            "html"
+            "templ"
+          ];
+
+          highlight.enable = true;
+        };
       };
+
 
       diagnostic.settings = {
         virtual_lines = {
@@ -24,7 +34,39 @@
 
   
       clipboard.register = "unnamedplus";
-  
+
+      plugins.roslyn = {
+        enable = true;
+      };
+
+      plugins.minuet = {
+        enable = true;
+      
+        settings = {
+          provider = "codestral";
+      
+          provider_options = {
+            codestral = {
+              api_key = "CODESTRAL_API_KEY";
+              model = "codestral-latest";
+            };
+          };
+     
+          virtualtext = {
+            auto_trigger_ft = [ "lua" "nix""javascript" "typescript" "go"  "templ"];
+            keymap = {
+              accept = "<A-a>";
+              dismiss = "<A-d>";
+            };
+          };
+
+          # virtualtext = {
+          #   auto_trigger_ft = [ "lua" "nix" ];
+          #   keymap.accept = "<A-A>";
+          # };
+        };
+      };
+
       plugins.telescope = {
         enable = true;
         keymaps = {
@@ -42,9 +84,9 @@
         };
       };
   
-      plugins.copilot-vim = {
-        enable = true;
-      };
+      # plugins.copilot-vim = {
+      #   enable = true;
+      # };
 
       plugins.rest = {
         enable = true;
@@ -113,22 +155,22 @@
         enable = true;
       };
 
-      plugins.copilot-chat = {
-        enable = true;
-        settings = {
-          model = "claude-sonnet-4.5";
-          # keymaps = {
-          #   chat = {
-          #     "<leader>cc" = "open";
-          #     "<leader>cr" = "reply";
-          #     "<leader>ca" = "action_menu";
-          #     "<leader>ce" = "edit_with_instruction";
-          #     "<leader>cd" = "select_and_send";
-          #   };
-          # };
-        };
-
-      };
+      # plugins.copilot-chat = {
+      #   enable = true;
+      #   settings = {
+      #     model = "claude-sonnet-4.5";
+      #     # keymaps = {
+      #     #   chat = {
+      #     #     "<leader>cc" = "open";
+      #     #     "<leader>cr" = "reply";
+      #     #     "<leader>ca" = "action_menu";
+      #     #     "<leader>ce" = "edit_with_instruction";
+      #     #     "<leader>cd" = "select_and_send";
+      #     #   };
+      #     # };
+      #   };
+      #
+      # };
   
       plugins.lsp = {
         enable = true;
@@ -152,6 +194,7 @@
           };
         };
         servers = {
+          # roslyn_ls.enable = true;
   	      ts_ls.enable = true;
   	      eslint.enable = true;
   	      # graphql.enable = true;

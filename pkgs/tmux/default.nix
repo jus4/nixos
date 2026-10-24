@@ -6,6 +6,7 @@
     enable = true;
     terminal = "tmux-256color";
     historyLimit = 100000;
+    mouse = true;
     # enableVim = true;
     # tmuxPlugins.powerline.enable = true;
     plugins = with pkgs;

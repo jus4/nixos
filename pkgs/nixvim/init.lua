@@ -1,5 +1,7 @@
 local nvim_lsp = require("lspconfig")
 
+print("MINUET CONFIG LOADED")
+
 vim.opt.guicursor = ""
 vim.opt.nu = true
 vim.opt.relativenumber = true
@@ -19,10 +21,10 @@ vim.keymap.set("t","<Esc>", "<C-\\><C-n>")
 
 vim.filetype.add({ extension = { templ = "templ" } })
 
-vim.cmd([[
-  let g:copilot_no_tab_map = v:true
-  imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")
-]])
+-- vim.cmd([[
+--   let g:copilot_no_tab_map = v:true
+--   imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")
+-- ]])
 
 
 -- Set a GEM_HOME to a user-writable path to avoid EROFS
@@ -48,3 +50,34 @@ nvim_lsp.ruby_lsp.setup({
 
 --tnoremap <M-[> <Esc>
 --tnoremap <C-v><Esc> <Esc>
+--
+-- -- =========================
+-- -- Minuet AI (Codestral only)
+-- -- =========================
+--
+-- require("minuet").setup({
+--   provider = "codestral",
+--
+--   provider_options = {
+--     codestral = {
+--       api_key = os.getenv("CODESTRAL_API_KEY"),
+--       model = "codestral-latest",
+--
+--       optional = {
+--         max_tokens = 256,
+--         stop = { "\n\n" },
+--       },
+--     },
+--   },
+--
+--   virtualtext = {
+--     auto_trigger_ft = { "lua", "nix", "python", "javascript", "typescript" },
+--
+--     keymap = {
+--       accept = "<A-a>",
+--       dismiss = "<A-d>",
+--       next = "<A-]>",   -- if multiple suggestions exist
+--       prev = "<A-[>",
+--     },
+--   },
+-- })
