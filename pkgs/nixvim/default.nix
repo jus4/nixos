@@ -3,6 +3,7 @@
 {
   programs.nixvim = {
       enable = true;
+      nixpkgs.useGlobalPackages = true;
       globals = {
         mapleader = " ";
         maplocalleader = " ";
@@ -53,7 +54,7 @@
           };
      
           virtualtext = {
-            auto_trigger_ft = [ "lua" "nix""javascript" "typescript" "go"  "templ"];
+            auto_trigger_ft = [ "lua" "nix" "javascript" "typescript" "go"  "templ" "python"];
             keymap = {
               accept = "<A-a>";
               dismiss = "<A-d>";

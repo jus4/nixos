@@ -1,11 +1,25 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 
+let
+  myPythonEnv = pkgs.python3.withPackages (ps: with ps; [
+    pkgs.python3Packages.websockets
+    pkgs.python3Packages.websocket-client
+  ]);
+
+  pkgsUnstable = import inputs.nixpkgs-unstable {
+    inherit (pkgs.stdenv.hostPlatform) system;
+    config.allowUnfree = true;
+  };
+in
 {
   imports = [
     # ./wm/xmonad
     ./wm/polybar
+    ./pkgs/git-delta
+    ./pkgs/lazygit
     ./services/dunst
     ./pkgs/tmux
+    ./pkgs/kitty
     ./pkgs/nixvim
     ./pkgs/starship
     ./pkgs/alacritty
@@ -34,6 +48,11 @@
 
   xdg.configFile."picom/picom.conf".source = ./pkgs/picom/picom.conf;
 
+  programs.antigravity-cli = {
+    enable = true;
+    package = pkgsUnstable.antigravity-cli;
+  };
+
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = with pkgs; [
@@ -44,7 +63,7 @@
     zip
     unzip
     xclip
-    lazygit
+    # lazygit
     mkcert
     tmux
     calc
@@ -54,13 +73,14 @@
     mysql84
     # zlib
     zstd   # ← required for mysql2 to link
-    figma-linux
+    penpot-desktop
 
     xorg.xev
     input-remapper
     evtest
 
     lm_sensors
+    htop
 
     gh
 
@@ -75,6 +95,8 @@
     pavucontrol # pulseaudio volume control
     paprefs # pulseaudio preferences
 
+    inputs.slk.packages.${pkgs.stdenv.hostPlatform.system}.default
+
     # xbindkeys
     # xbindkeys-config
     xdotool
@@ -86,6 +108,9 @@
     pulsemixer
 
     appimage-run
+
+    # stocks
+    ticker
 
     #browser
     links2
@@ -102,7 +127,6 @@
 
     # pkgs.teams
 
-    gphoto2
     libgphoto2
 
     # Gaming
@@ -125,8 +149,6 @@
 
     # xmonad
     dialog # Dialog boxes on the terminal (to show key bindings)
-    networkmanager_dmenu # networkmanager on dmenu
-    networkmanagerapplet # networkmanager applet
     nitrogen # wallpaper manager
     xcape # keymaps modifier
     xorg.xkbcomp # keymaps modifier
@@ -135,6 +157,7 @@
 
     # network
     networkmanagerapplet
+    networkmanager_dmenu # networkmanager on dmenu
     whois
     dig
 
@@ -150,6 +173,8 @@
 
     #music
     spotify
+    inputs.spotifast.packages.${pkgs.stdenv.hostPlatform.system}.default
+    spotify-player
 
     #screenshot
     flameshot
@@ -292,9 +317,47 @@
   #
   #  /etc/profiles/per-user/juice/etc/profile.d/hm-session-vars.sh
   #
-  home.sessionVariables = {
-    # ASPELL_CONF = "dict-dir /home/juice/.nix-profile/lib/aspell";
-  };
+
+  # systemd.user.services.websocket-dunst = {
+  #   description = "WebSocket to Dunst Notification Service";
+  #   wantedBy = [ "multi-user.target" ];
+  #   after = [ "network.target" ];
+  # 
+  #   # This injects python and dunst into the service's PATH
+  #   path = [ myPythonEnv pkgs.dunst ];
+  # 
+  #   serviceConfig = {
+  #     # Replace with your actual username so it doesn't run blindly as root
+  #     User = "juice"; 
+  #     # Necessary for dunst to know which graphical display/dbus to hook into
+  #     Environment = [
+  #       "DISPLAY=:0"
+  #       "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus"
+  #     ];
+  #     EnvironmentFile = "$HOME/env/notification_service.env";   
+  #     ExecStart = "${myPythonEnv}/bin/python ./scripts/notification_service.py";
+  #     Restart = "always";
+  #     RestartSec = "5s";
+  #   };
+  # };
+
+  systemd.user.services.websocket-dunst = {
+      Unit = {
+        Description = "WebSocket to Dunst Notification Service";
+        After = [ "network.target" ];
+      };
+      Service = {
+        ExecStart = "${myPythonEnv}/bin/python %h/.dotfiles/scripts/notification_service.py";
+        # ExecStart = "${myPythonEnv}/bin/python ${./scripts/notification_service.py}";
+        # ExecStart = "${myPythonEnv}/bin/python ./scripts/notification_service.py";
+        Restart = "always";
+        RestartSec = "10s";
+        EnvironmentFile = "%h/env/notification_service.env";
+      };
+      Install = {
+        WantedBy = [ "graphical-session.target" ];
+      };
+    };
 
   programs = {
     direnv = {

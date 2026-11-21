@@ -95,6 +95,16 @@
     #media-session.enable = true;
   };
 
+  # Prefer HDMI/DP (monitor) audio when connected; fall back to laptop speakers.
+  services.pipewire.wireplumber.extraConfig."51-hdmi-default" = {
+    "monitor.alsa.rules" = [
+      {
+        matches = [ { "node.name" = "~alsa_output.*hdmi.*"; } ];
+        actions.update-props."priority.session" = 1400;
+      }
+    ];
+  };
+
   # sound.enable = true;
   nixpkgs.config.pulseaudio = true;
 
@@ -120,6 +130,8 @@
     ""
     "${pkgs.bluez}/libexec/bluetooth/bluetoothd --noplugin=sap,avrcp"
   ];
+
+
 
   # Latest kernel
   # boot.kernelPackages = pkgs.linuxPackages_6_12;
@@ -154,7 +166,6 @@
   programs.slock.enable = true;
   programs.xss-lock.enable = true;
   programs.xss-lock.lockerCommand = "/run/wrappers/bin/slock";
-
   # boot.kernelParams = [ "button.lid_init_state=open" "nvidia.env.preserve_video_memory_allocations=1" ];
 
 
@@ -180,14 +191,55 @@
     nerd-fonts.droid-sans-mono
     nerd-fonts._3270
     nerd-fonts.symbols-only 
-    pciutils
     brightnessctl
     # glxinfo
-    dunst
+    (pkgs.writeShellScriptBin "volume" ''
+      #!/bin/sh
+      set -eu
+      WPCTL="${pkgs.wireplumber}/bin/wpctl"
+      DUNSTIFY="${pkgs.dunst}/bin/dunstify"
+      AWK="${pkgs.gawk}/bin/awk"
+
+      case "''${1:-}" in
+        up)   "$WPCTL" set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+ ;;
+        down) "$WPCTL" set-volume @DEFAULT_AUDIO_SINK@ 5%- ;;
+        mute) "$WPCTL" set-mute @DEFAULT_AUDIO_SINK@ toggle ;;
+        *) echo "usage: volume up|down|mute" >&2; exit 2 ;;
+      esac
+
+      info=$("$WPCTL" get-volume @DEFAULT_AUDIO_SINK@)
+      pct=$("$AWK" -v s="$info" 'BEGIN{ split(s,a," "); printf "%d", a[2]*100 }')
+      case "$info" in
+        *MUTED*) icon=audio-volume-muted; text="Muted" ;;
+        *) if   [ "$pct" -lt 34 ]; then icon=audio-volume-low
+           elif [ "$pct" -lt 67 ]; then icon=audio-volume-medium
+           else icon=audio-volume-high; fi
+           text="Volume ''${pct}%" ;;
+      esac
+      "$DUNSTIFY" -a volume -i "$icon" -h int:value:"$pct" -r 2593 -t 1500 "$text"
+    '')
+    (pkgs.writeShellScriptBin "brightness" ''
+      #!/bin/sh
+      set -eu
+      BCTL="${pkgs.brightnessctl}/bin/brightnessctl"
+      DUNSTIFY="${pkgs.dunst}/bin/dunstify"
+      AWK="${pkgs.gawk}/bin/awk"
+
+      case "''${1:-}" in
+        up)   "$BCTL" set 5%+ ;;
+        down) "$BCTL" set 5%- ;;
+        *) echo "usage: brightness up|down" >&2; exit 2 ;;
+      esac
+
+      pct=$("$BCTL" -m | "$AWK" -F, '{gsub(/%/,"",$4); print $4}')
+      if   [ "$pct" -lt 34 ]; then icon=display-brightness-low
+      elif [ "$pct" -lt 67 ]; then icon=display-brightness-medium
+      else icon=display-brightness-high; fi
+      "$DUNSTIFY" -a brightness -i "$icon" -h int:value:"$pct" -r 2594 -t 1500 "Brightness ''${pct}%"
+    '')
     picom
     pcre.dev
     # node2nix
-    zsh
     helix
     typescript
     findutils
@@ -207,7 +259,6 @@
     bun
     ruby
     # neofetch
-    alacritty
     alacritty-theme
     firefox
     lutris
@@ -250,12 +301,7 @@
 
     ollama = {
       enable = true;
-
-      # Choose the package matching your GPU:
-      # package = pkgs.ollama-cuda;    # NVIDIA
       package = pkgs.ollama-rocm;    # AMD
-      # package = pkgs.ollama-vulkan;  # Vulkan
-      # default is CPU
     };
 
     printing = {
@@ -368,12 +414,6 @@
   # TODO fix not working yeat
   systemd.services = {
     upower.enable = true;
-  #  suspend-on-low-battery = {
-  #    description = "Suspend on low battery";
-  #    serviceConfig = {
-  #      ExecStart = "./suspend_on_low.sh";
-  #    };
-  #  };
   };
 
   systemd.timers.suspend-on-low-battery = {
@@ -384,60 +424,6 @@
     };
   };
 
-  # This is the one that correctly adds the udev rules!
-  # programs.adb.enable = true;
-
-  # Not sure if this is necessary if the above is set?
-  # services.udev.packages = [
-  #   pkgs.android-udev-rules
-  # ];
-
-  # hardware.nvidia = {
-  #   modesetting.enable = true;
-  #
-  #   # Nvidia power management. Experimental, and can cause sleep/suspend to fail.
-  #   # powerManagement.enable = false; // did cause sleep/suspend to fail ?
-  #   # Fine-grained power management. Turns off GPU when not in use.
-  #   # Experimental and only works on modern Nvidia GPUs (Turing or newer).
-  #   powerManagement.finegrained = false;
-  #   powerManagement.enable = true;
-  #
-  #   # Use the NVidia open source kernel module (not to be confused with the
-  #   # independent third-party "nouveau" open source driver).
-  #   # Support is limited to the Turing and later architectures. Full list of 
-  #   # supported GPUs is at: 
-  #   # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus 
-  #   # Only available from driver 515.43.04+
-  #   # Currently alpha-quality/buggy, so false is currently the recommended setting.
-  #   open = false;
-  #
-  #   # Enable the Nvidia settings menu,
-	 #  # accessible via `nvidia-settings`.
-  #   nvidiaSettings = true;
-  #
-  #   # Optionally, you may need to select the appropriate driver version for your specific GPU.
-  #   # package = pkgs.nvidiaPackages.stable; 
-  #   # package = config.boot.kernelPackages.nvidiaPackages.stable;
-  #
-  #   package = config.boot.kernelPackages.nvidiaPackages.beta;
-  #
-  #   prime = { 
-  #     offload.enable = true;
-		# # Make sure to use the correct Bus ID values for your system!
-  #   	intelBusId = "PCI:00:02:0";
-		#   nvidiaBusId = "PCI:03:00:0";
-  #
-		# #  intelBusId = "PCI:00:02.0";
-		# #  nvidiaBusId = "PCI:01:00.0";
-	 #  };
-  # };
-
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
-
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It‘s perfectly fine and recommended to leave
@@ -445,6 +431,16 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "24.05"; # Did you read the comment?
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix = {
+    settings = {
+      experimental-features = [ "nix-command" "flakes" ];
+      auto-optimise-store = true; # Deduplicates identical store files via hardlinks
+    };
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 20d";
+    };
+  };
   networking.firewall.allowedUDPPorts = [ 500 4500 ];
 }

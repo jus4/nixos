@@ -1,5 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
+#include <X11/XF86keysym.h>
+
 /* appearance */
 static const unsigned int borderpx  = 1;        /* border pixel of windows */
 static const unsigned int snap      = 32;       /* snap pixel */
@@ -75,6 +77,7 @@ static const Layout layouts[] = {
 
 /* key definitions */
 #define MODKEY Mod4Mask
+#define GAPMOD Mod1Mask
 #define TAGKEYS(KEY,TAG) \
 	{ MODKEY,                       KEY,      view,           {.ui = 1 << TAG} }, \
 	{ MODKEY|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
@@ -95,6 +98,11 @@ static const Key keys[] = {
 	{ MODKEY,                       XK_o,      spawn,          {.v = dmenucmd } },
   { MODKEY,                       XK_p,      spawn,          {.v = rofi } },
 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
+	{ 0,                            XF86XK_AudioRaiseVolume, spawn, SHCMD("volume up") },
+	{ 0,                            XF86XK_AudioLowerVolume, spawn, SHCMD("volume down") },
+	{ 0,                            XF86XK_AudioMute,        spawn, SHCMD("volume mute") },
+	{ 0,                            XF86XK_MonBrightnessUp,   spawn, SHCMD("brightness up") },
+	{ 0,                            XF86XK_MonBrightnessDown, spawn, SHCMD("brightness down") },
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
 	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
@@ -106,22 +114,22 @@ static const Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_l,      setcfact,       {.f = -0.25} },
 	{ MODKEY|ShiftMask,             XK_o,      setcfact,       {.f =  0.00} },
 	{ MODKEY,                       XK_Return, zoom,           {0} },
-	{ MODKEY|Mod4Mask,              XK_u,      incrgaps,       {.i = +1 } },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_u,      incrgaps,       {.i = -1 } },
-	{ MODKEY|Mod4Mask,              XK_i,      incrigaps,      {.i = +1 } },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_i,      incrigaps,      {.i = -1 } },
-	{ MODKEY|Mod4Mask,              XK_o,      incrogaps,      {.i = +1 } },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_o,      incrogaps,      {.i = -1 } },
-	{ MODKEY|Mod4Mask,              XK_6,      incrihgaps,     {.i = +1 } },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_6,      incrihgaps,     {.i = -1 } },
-	{ MODKEY|Mod4Mask,              XK_7,      incrivgaps,     {.i = +1 } },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_7,      incrivgaps,     {.i = -1 } },
-	{ MODKEY|Mod4Mask,              XK_8,      incrohgaps,     {.i = +1 } },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_8,      incrohgaps,     {.i = -1 } },
-	{ MODKEY|Mod4Mask,              XK_9,      incrovgaps,     {.i = +1 } },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_9,      incrovgaps,     {.i = -1 } },
-	{ MODKEY|Mod4Mask,              XK_0,      togglegaps,     {0} },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_0,      defaultgaps,    {0} },
+	{ MODKEY|GAPMOD,                XK_u,      incrgaps,       {.i = +1 } },
+	{ MODKEY|GAPMOD|ShiftMask,      XK_u,      incrgaps,       {.i = -1 } },
+	{ MODKEY|GAPMOD,                XK_i,      incrigaps,      {.i = +1 } },
+	{ MODKEY|GAPMOD|ShiftMask,      XK_i,      incrigaps,      {.i = -1 } },
+	{ MODKEY|GAPMOD,                XK_o,      incrogaps,      {.i = +1 } },
+	{ MODKEY|GAPMOD|ShiftMask,      XK_o,      incrogaps,      {.i = -1 } },
+	{ MODKEY|GAPMOD,                XK_6,      incrihgaps,     {.i = +1 } },
+	{ MODKEY|GAPMOD|ShiftMask,      XK_6,      incrihgaps,     {.i = -1 } },
+	{ MODKEY|GAPMOD,                XK_7,      incrivgaps,     {.i = +1 } },
+	{ MODKEY|GAPMOD|ShiftMask,      XK_7,      incrivgaps,     {.i = -1 } },
+	{ MODKEY|GAPMOD,                XK_8,      incrohgaps,     {.i = +1 } },
+	{ MODKEY|GAPMOD|ShiftMask,      XK_8,      incrohgaps,     {.i = -1 } },
+	{ MODKEY|GAPMOD,                XK_9,      incrovgaps,     {.i = +1 } },
+	{ MODKEY|GAPMOD|ShiftMask,      XK_9,      incrovgaps,     {.i = -1 } },
+	{ MODKEY|GAPMOD,                XK_0,      togglegaps,     {0} },
+	{ MODKEY|GAPMOD|ShiftMask,      XK_0,      defaultgaps,    {0} },
 	{ MODKEY,                       XK_Tab,    view,           {0} },
 	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },
 	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },
