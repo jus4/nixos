@@ -29,10 +29,11 @@
     }
   ];
 
-  boot.kernelParams = ["resume_offset=201213952" "usbcore.autosuspend=-1" "amdgpu.noretry=0" "amdgpu.runpm=0" "amdgpu.sg_display=0"];
+  boot.kernelParams = ["resume_offset=201213952" "usbcore.autosuspend=-1" "amdgpu.noretry=0"  "amdgpu.sg_display=0" "mem_sleep_default=deep"];
   boot.resumeDevice = "/dev/disk/by-uuid/135cda41-5466-4565-b28e-57eeb4b857cd";
   powerManagement.enable = true;
   powerManagement.cpuFreqGovernor = "schedutil";
+  # powerManagement.cpuFreqGovernor = "powersave";
 
   networking.extraHosts =
   ''
@@ -55,15 +56,13 @@
   i18n.defaultLocale = "en_US.UTF-8";
 
   hardware.enableAllFirmware = true;
-  hardware.opengl = {
-    enable = true;
-    # driSupport = true;
-    driSupport32Bit = true;
-  };
 
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
+    extraPackages = with pkgs; [
+      libva-utils # provides `vainfo` CLI tool
+    ];
     # extraPackages = with pkgs; [
     #   amdvlk       # AMD's Vulkan driver
     #   # optionally, packages for VA-API / VDPAU etc if you need video decode/encode
@@ -186,12 +185,9 @@
     zlib
     acpi
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-    nerd-fonts.jetbrains-mono
-    nerd-fonts.fira-code
-    nerd-fonts.droid-sans-mono
-    nerd-fonts._3270
-    nerd-fonts.symbols-only 
     brightnessctl
+    vulkan-tools
+    libva-utils
     # glxinfo
     (pkgs.writeShellScriptBin "volume" ''
       #!/bin/sh
@@ -296,6 +292,9 @@
         # Balanced scaling limits for Zen 2 on AC vs Battery
         CPU_SCALING_GOVERNOR_ON_AC = "schedutil";
         CPU_SCALING_GOVERNOR_ON_BAT = "schedutil";
+
+        CPU_ENERGY_PERF_POLICY_ON_AC = "balance_performance";
+        CPU_ENERGY_PERF_POLICY_ON_BAT = "balance_power";
       };
     };
 
@@ -416,13 +415,13 @@
     upower.enable = true;
   };
 
-  systemd.timers.suspend-on-low-battery = {
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnBootSec = "5min";
-      OnUnitActiveSec = "1min";
-    };
-  };
+  # systemd.timers.suspend-on-low-battery = {
+  #   wantedBy = [ "timers.target" ];
+  #   timerConfig = {
+  #     OnBootSec = "5min";
+  #     OnUnitActiveSec = "1min";
+  #   };
+  # };
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

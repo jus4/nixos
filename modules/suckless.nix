@@ -3,7 +3,7 @@
 {
   home.packages = with pkgs; [
     (pkgs.dmenu.overrideAttrs (_: {
-      src = ../pkgs/dmenu;
+      src = ../modules/dmenu;
       patches = [];
     }))
     st

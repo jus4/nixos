@@ -15,17 +15,17 @@ in
   imports = [
     # ./wm/xmonad
     ./wm/polybar
-    ./pkgs/git-delta
-    ./pkgs/lazygit
+    ./modules/git-delta
+    ./modules/lazygit
     ./services/dunst
-    ./pkgs/tmux
-    ./pkgs/kitty
-    ./pkgs/nixvim
-    ./pkgs/starship
-    ./pkgs/alacritty
-    ./pkgs/emacs
-    ./pkgs/newsboat
-    ./pkgs/zsh
+    ./modules/tmux
+    ./modules/kitty
+    ./modules/nixvim
+    ./modules/starship
+    ./modules/alacritty
+    ./modules/emacs
+    ./modules/newsboat
+    ./modules/zsh
     ./modules/suckless.nix
   ];
 
@@ -46,11 +46,12 @@ in
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  xdg.configFile."picom/picom.conf".source = ./pkgs/picom/picom.conf;
+  xdg.configFile."picom/picom.conf".source = ./modules/picom/picom.conf;
 
   programs.antigravity-cli = {
     enable = true;
-    package = pkgsUnstable.antigravity-cli;
+    # package = pkgsUnstable.antigravity-cli;
+    package = pkgs.unstable.antigravity-cli;
   };
 
   # The home.packages option allows you to install Nix packages into your
@@ -58,7 +59,7 @@ in
   home.packages = with pkgs; [
     # Development tools
     # ollama
-
+    lm_sensors
     xwallpaper
     zip
     unzip
@@ -228,7 +229,7 @@ in
 
     #DWM blocks
     (pkgs.dwmblocks.overrideAttrs (old: {
-      src = ./pkgs/dwmblocks;
+      src = ./modules/dwmblocks;
     }))
 
     # Custom scripts
